@@ -17,12 +17,23 @@
   body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.022) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.022) 40px);pointer-events:none;z-index:0;}
   .container{max-width:960px;margin:0 auto;position:relative;z-index:1;}
 
-/* Province selector */
+/* Province selector — iOS-safe */
 .province-bar{display:flex;align-items:center;gap:14px;background:var(–surface);border:1px solid var(–border);border-radius:10px;padding:14px 18px;margin-bottom:32px;flex-wrap:wrap;}
 .province-bar label{font-size:10px;text-transform:uppercase;letter-spacing:.15em;color:var(–muted);white-space:nowrap;}
-.province-select{background:var(–surface2);border:1px solid var(–accent);border-radius:6px;color:var(–accent);font-family:‘DM Mono’,monospace;font-size:13px;font-weight:500;padding:8px 14px;cursor:pointer;outline:none;flex:1;min-width:200px;}
-.province-select option{background:#1c2030;color:#f0f2fa;}
+.select-wrap{position:relative;flex:1;min-width:200px;}
+.select-wrap::after{content:‘▾’;position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(–accent);font-size:14px;pointer-events:none;}
+.province-select{width:100%;background:#242840 !important;-webkit-appearance:none;-moz-appearance:none;appearance:none;border:1px solid #3dffa0 !important;border-radius:6px;color:#3dffa0 !important;-webkit-text-fill-color:#3dffa0;font-family:‘DM Mono’,ui-monospace,monospace;font-size:13px;font-weight:500;padding:8px 32px 8px 14px;cursor:pointer;outline:none;}
+.province-select option{background:#1c2030 !important;color:#f0f2fa !important;}
 .prov-badge{font-size:10px;background:rgba(61,255,160,.1);border:1px solid rgba(61,255,160,.25);border-radius:4px;padding:3px 10px;color:var(–accent);letter-spacing:.08em;white-space:nowrap;}
+/* Marginal rate indicator */
+.marginal-bar{grid-column:1/-1;background:var(–surface);border:1px solid var(–border);border-radius:8px;padding:14px 18px;display:none;}
+.marginal-bar.visible{display:flex;align-items:center;flex-wrap:wrap;gap:12px;}
+.marginal-label{font-size:10px;text-transform:uppercase;letter-spacing:.12em;color:var(–muted);margin-right:4px;}
+.marginal-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.mchip{font-size:11px;padding:4px 10px;border-radius:5px;font-weight:500;}
+.mchip.fed{background:rgba(106,163,255,.12);border:1px solid rgba(106,163,255,.3);color:#6aa3ff;}
+.mchip.prov{background:rgba(61,255,160,.1);border:1px solid rgba(61,255,160,.25);color:#3dffa0;}
+.mchip.combined{background:rgba(255,217,102,.1);border:1px solid rgba(255,217,102,.3);color:#ffd966;}
 
 header{margin-bottom:28px;border-left:3px solid var(–accent);padding-left:20px;}
 header .year-badge{font-size:11px;color:var(–accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px;}
@@ -169,7 +180,12 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
 /* Tip box + disclaimer */
 .tip-box{grid-column:1/-1;background:rgba(61,255,160,.05);border:1px solid rgba(61,255,160,.15);border-radius:6px;padding:14px 16px;font-size:11px;color:#7a9c8a;line-height:1.8;}
 .tip-box strong{color:#3dffa0;}
-.disclaimer{grid-column:1/-1;font-size:10px;color:#4a5268;text-align:center;margin-top:4px;line-height:1.6;}
+.disclaimer{grid-column:1/-1;margin-top:8px;}
+.disclaimer-box{background:rgba(255,112,112,.04);border:1px solid rgba(255,112,112,.2);border-radius:8px;padding:18px 20px;font-size:10.5px;color:#7a6a6a;line-height:1.8;}
+.disclaimer-box p{margin-bottom:8px;}
+.disclaimer-box p:last-child{margin-bottom:0;}
+.disclaimer-box strong{color:#c08080;}
+.disclaimer-title{font-size:11px;font-weight:600;color:#c08080;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px;}
 
 /* Hidden province-specific elements */
 .qc-only{display:none;}
@@ -183,7 +199,7 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
 
   <div class="province-bar">
     <label>Province / Territory</label>
-    <select class="province-select" id="provinceSelect" onchange="switchProvince()">
+    <div class="select-wrap"><select class="province-select" id="provinceSelect" onchange="switchProvince()">
       <option value="QC">Québec</option>
       <option value="ON">Ontario</option>
       <option value="BC">British Columbia</option>
@@ -194,7 +210,7 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
       <option value="NB">New Brunswick</option>
       <option value="PE">Prince Edward Island</option>
       <option value="NL">Newfoundland & Labrador</option>
-    </select>
+    </select></div>
     <span class="prov-badge" id="provBadge">QC · Dual Return</span>
   </div>
 
@@ -207,6 +223,16 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
   <div class="grid">
 
 ```
+<!-- ══ MARGINAL RATE INDICATOR ══ -->
+<div class="marginal-bar full-width" id="marginalBar">
+  <span class="marginal-label">Your next dollar is taxed at →</span>
+  <div class="marginal-chips">
+    <span class="mchip fed" id="mchip-fed">Fed —</span>
+    <span class="mchip prov" id="mchip-prov">Prov —</span>
+    <span class="mchip combined" id="mchip-combined">Combined —</span>
+  </div>
+</div>
+
 <!-- ══ EMPLOYMENT ══ -->
 <div class="card">
   <div class="card-title">Employment Income</div>
@@ -217,7 +243,7 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
       <span class="tooltip-btn" onclick="toggleTip('tip-employment')">?</span>
     </div>
     <div class="tooltip-popup" id="tip-employment"></div>
-    <input type="number" id="employment" placeholder="0" min="0" oninput="updatePensionDisplay()">
+    <input type="number" id="employment" placeholder="0" min="0" oninput="updatePensionDisplay();updateMarginalRate()">
   </div>
 
   <div class="income-sub-section">
@@ -305,7 +331,7 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
       <span class="tooltip-btn" onclick="toggleTip('tip-serev')">?</span>
     </div>
     <div class="tooltip-popup" id="tip-serev"></div>
-    <input type="number" id="seRevenue" placeholder="0" min="0" oninput="updateSEQPP()">
+    <input type="number" id="seRevenue" placeholder="0" min="0" oninput="updateSEQPP();updateMarginalRate()">
   </div>
 
   <!-- Expenses breakdown -->
@@ -595,7 +621,15 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
 </div>
 
 <div class="tip-box full-width" id="tipBox"></div>
-<div class="disclaimer full-width">⚠ Estimates only — for planning purposes. Always file using CRA-certified software or consult a CPA. Numbers based on confirmed 2025 rates.</div>
+<div class="disclaimer full-width" id="legalDisclaimer">
+  <div class="disclaimer-box">
+    <div class="disclaimer-title">⚠️ Important Legal Disclaimer</div>
+    <p>This calculator is provided for <strong>general informational and planning purposes only</strong>. The results are <strong>estimates only</strong> and do not constitute financial, tax, legal, or accounting advice of any kind.</p>
+    <p>This tool <strong>cannot and must not</strong> be used to file your taxes, make legal financial decisions, or as a substitute for advice from a qualified professional. All calculations are based on publicly available 2025 rates and may not reflect your specific personal circumstances, applicable credits, deductions, surtaxes, clawbacks, or recent regulatory changes.</p>
+    <p><strong>Always consult a licensed CPA (Chartered Professional Accountant), tax professional, or legal advisor before making any financial decisions.</strong> For Québec residents, consult both a CPA and Revenu Québec resources. Federal guidance is available through the Canada Revenue Agency (CRA) at canada.ca.</p>
+    <p style="margin-top:8px;color:#3a4258;">By using this tool, you acknowledge that no professional-client relationship is created, and that the creators assume no liability for errors, omissions, or decisions made based on these estimates.</p>
+  </div>
+</div>
 ```
 
   </div><!-- /grid -->
@@ -1486,6 +1520,7 @@ function switchProvince() {
   updatePensionDisplay();
   updateSEQPP();
   updateSEExpenses();
+  updateMarginalRate();
 
   // Hide results (province changed = recalculate)
   document.getElementById('results').style.display = 'none';
@@ -1560,6 +1595,28 @@ function sendChat(type){
 // LIVE DISPLAYS
 // ════════════════════════════════════════════════════════
 function fmt(n){return '$'+Math.abs(n).toLocaleString('en-CA',{minimumFractionDigits:0,maximumFractionDigits:0});}
+
+function updateMarginalRate(){
+  const p=getP();
+  const isQC=p.pensionPlan==='QPP';
+  const emp=+document.getElementById('employment').value||0;
+  const seRev=+document.getElementById('seRevenue').value||0;
+  const totalIncome=emp+seRev;
+  if(totalIncome<=0){document.getElementById('marginalBar').classList.remove('visible');return;}
+  document.getElementById('marginalBar').classList.add('visible');
+  // Find federal bracket
+  const fedBracketsRaw=[[57375,0.145],[57375,0.205],[63132,0.26],[75532,0.29],[Infinity,0.33]];
+  let fedRate=0.145,cum=16129;
+  for(const[s,r]of fedBracketsRaw){cum+=s;if(totalIncome<cum){fedRate=r;break;}fedRate=r;}
+  const fedEffective=fedRate*(1-p.abatement);
+  // Find prov bracket
+  let provRate=p.provBrackets[0][1],cumP=p.provBPA;
+  for(const[s,r]of p.provBrackets){cumP+=s;if(totalIncome<cumP){provRate=r;break;}provRate=r;}
+  const combined=fedEffective+provRate;
+  document.getElementById('mchip-fed').textContent=`Fed ${(fedEffective*100).toFixed(1)}%${p.abatement>0?' (after ABAT)':''}`;
+  document.getElementById('mchip-prov').textContent=`${p.name} ${(provRate*100).toFixed(2)}%`;
+  document.getElementById('mchip-combined').textContent=`Combined ${(combined*100).toFixed(1)}%`;
+}
 
 function updatePensionDisplay(){
   const p=getP();
