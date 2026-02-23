@@ -72,7 +72,46 @@ padding: 8px 10px; border-radius: 4px; transition: border-color 0.15s; outline: 
 .hint { font-size: 10px; color: #5a6480; margin-top: 3px; line-height: 1.5; }
 .hint.found { color: #7080a0; }
 
-/* ? tooltip button */
+/* ── Bracket reference table ── */
+.bracket-card { grid-column: 1 / -1; }
+.bracket-note {
+background: rgba(61,255,160,0.07); border: 1px solid rgba(61,255,160,0.2);
+border-radius: 6px; padding: 10px 14px; font-size: 11px; color: #b0bcd8;
+margin-bottom: 18px; line-height: 1.7;
+}
+.bracket-note strong { color: #3dffa0; }
+.bracket-tables { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+@media(max-width:600px) { .bracket-tables { grid-template-columns: 1fr; } }
+.bracket-section { background: var(–surface2); border-radius: 8px; padding: 14px; border: 1px solid var(–border); }
+.bracket-header { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 2px; }
+.fed-header { color: #6aa3ff; }
+.qc-header  { color: #3dffa0; }
+.bracket-sub { font-size: 10px; color: var(–muted); margin-bottom: 10px; letter-spacing: 0.03em; }
+.bracket-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.bracket-table thead tr { border-bottom: 1px solid var(–border); }
+.bracket-table th { color: var(–muted); font-weight: 500; text-align: left; padding: 4px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; }
+.bracket-table td { padding: 5px 6px; color: #c8d0e8; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.bracket-table tr:last-child td { border-bottom: none; }
+.bracket-table tr:hover td { background: rgba(255,255,255,0.03); }
+.qc-rate { color: #ffd966; font-weight: 500; }
+.bracket-footnote { font-size: 10px; color: #5a6480; margin-top: 8px; line-height: 1.5; }
+.combined-row {
+background: rgba(255,255,255,0.03); border: 1px solid var(–border);
+border-radius: 8px; padding: 12px 16px;
+}
+.combined-label { font-size: 10px; color: var(–muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.combined-rates { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.combined-chip {
+background: rgba(106,163,255,0.1); border: 1px solid rgba(106,163,255,0.25);
+border-radius: 5px; padding: 4px 10px; font-size: 11px; color: #9aa3b8;
+}
+.combined-chip strong { color: #6aa3ff; }
+.combined-chip.qc { background: rgba(61,255,160,0.08); border-color: rgba(61,255,160,0.2); }
+.combined-chip.qc strong { color: #3dffa0; }
+.combined-chip.total { background: rgba(255,217,102,0.1); border-color: rgba(255,217,102,0.25); }
+.combined-chip.total strong { color: #ffd966; font-size: 13px; }
+.combined-plus { color: var(–muted); font-size: 14px; }
+
 .tooltip-btn {
 width: 16px; height: 16px; border-radius: 50%;
 background: var(–surface2); border: 1px solid var(–border);
@@ -1007,6 +1046,63 @@ letter-spacing: 0.1em; vertical-align: middle; margin-left: 4px;
   </div>
 </div>
 
+<!-- TAX BRACKET REFERENCE TABLE -->
+<div class="card full-width bracket-card">
+  <div class="card-title">2025 Tax Bracket Reference</div>
+
+  <div class="bracket-note">
+    <strong>ABAT</strong> — Abattement du Québec (Québec Abatement): Because Québec runs its own social programs independently, QC residents pay <strong>16.5% less federal tax</strong> than other Canadians. This is already applied in the calculator. It's unique to Québec — no other province has this.
+  </div>
+
+  <div class="bracket-tables">
+    <!-- Federal -->
+    <div class="bracket-section">
+      <div class="bracket-header fed-header">🇨🇦 Federal (after 16.5% ABAT)</div>
+      <div class="bracket-sub">Effective rates for QC residents · BPA $16,129</div>
+      <table class="bracket-table">
+        <thead><tr><th>Taxable Income</th><th>Rate</th><th>QC Effective*</th></tr></thead>
+        <tbody>
+          <tr><td>$0 – $57,375</td><td>14.5%</td><td class="qc-rate">12.1%</td></tr>
+          <tr><td>$57,375 – $114,750</td><td>20.5%</td><td class="qc-rate">17.1%</td></tr>
+          <tr><td>$114,750 – $177,882</td><td>26%</td><td class="qc-rate">21.7%</td></tr>
+          <tr><td>$177,882 – $253,414</td><td>29%</td><td class="qc-rate">24.2%</td></tr>
+          <tr><td>$253,414+</td><td>33%</td><td class="qc-rate">27.6%</td></tr>
+        </tbody>
+      </table>
+      <div class="bracket-footnote">*After 16.5% ABAT reduction. Other provinces pay the full rate.</div>
+    </div>
+
+    <!-- Quebec -->
+    <div class="bracket-section">
+      <div class="bracket-header qc-header">🔵 Québec Provincial</div>
+      <div class="bracket-sub">TP-1 return · BPA $17,183</div>
+      <table class="bracket-table">
+        <thead><tr><th>Taxable Income</th><th>Rate</th><th>On This Slice</th></tr></thead>
+        <tbody>
+          <tr><td>$0 – $53,255</td><td>14%</td><td class="qc-rate">$0 – $7,456</td></tr>
+          <tr><td>$53,255 – $106,510</td><td>19%</td><td class="qc-rate">up to $10,118</td></tr>
+          <tr><td>$106,510 – $129,590</td><td>24%</td><td class="qc-rate">up to $5,540</td></tr>
+          <tr><td>$129,590+</td><td>25.75%</td><td class="qc-rate">highest slice</td></tr>
+        </tbody>
+      </table>
+      <div class="bracket-footnote">Rates unchanged from 2024. Thresholds indexed 2.85%.</div>
+    </div>
+  </div>
+
+  <!-- Combined summary row -->
+  <div class="combined-row">
+    <div class="combined-label">Combined top marginal rate for QC residents</div>
+    <div class="combined-rates">
+      <span class="combined-chip">Fed (after ABAT) <strong>27.6%</strong></span>
+      <span class="combined-plus">+</span>
+      <span class="combined-chip qc">QC Provincial <strong>25.75%</strong></span>
+      <span class="combined-plus">=</span>
+      <span class="combined-chip total">Combined <strong>53.31%</strong></span>
+    </div>
+    <div class="bracket-footnote" style="margin-top:6px;">Top rate kicks in at $253,414 federal / $129,590 QC · Capital gains only 50% included · Eligible dividends taxed much lower</div>
+  </div>
+</div>
+
 <button class="calc-btn" onclick="calculate()">↳ CALCULATE MY 2025 TAXES</button>
 
 <!-- RESULTS -->
@@ -1216,13 +1312,15 @@ function fmt(n) {
 
 // ─── TAX BRACKETS 2025 ───
 function federalTax(taxable) {
-  // 2025 federal brackets (indexed ~2.7% from 2024)
+  // 2025 federal brackets — confirmed CRA
+  // Note: lowest rate is 14.5% (was 15%, cut to 14% on July 1 = 14.5% effective for full year)
+  // From 2026 onward it will be 14% for the full year
   const brackets = [
-    [57375, 0.15],
-    [57375, 0.205],
-    [63895, 0.26],
-    [76980, 0.29],
-    [Infinity, 0.33]
+    [57375, 0.145],   // 14.5% on first $57,375
+    [57375, 0.205],   // 20.5% on $57,375–$114,750
+    [63132, 0.26],    // 26%   on $114,750–$177,882
+    [75532, 0.29],    // 29%   on $177,882–$253,414
+    [Infinity, 0.33], // 33%   on $253,414+
   ];
   let tax = 0, r = Math.max(0, taxable);
   for (const [s, rate] of brackets) { const c = Math.min(r, s); tax += c * rate; r -= c; if (r <= 0) break; }
@@ -1230,12 +1328,12 @@ function federalTax(taxable) {
 }
 
 function quebecTax(taxable) {
-  // 2025 Quebec brackets
+  // 2025 Québec brackets — confirmed Revenu Québec (indexed 2.85% from 2024)
   const brackets = [
-    [53255, 0.14],
-    [53255, 0.19],
-    [20635, 0.24],
-    [Infinity, 0.2575]
+    [53255,   0.14],    // 14%    on first $53,255
+    [53255,   0.19],    // 19%    on $53,255–$106,510
+    [18210,   0.24],    // 24%    on $106,510–$124,720  (approx — indexed)
+    [Infinity, 0.2575]  // 25.75% on $124,720+
   ];
   let tax = 0, r = Math.max(0, taxable);
   for (const [s, rate] of brackets) { const c = Math.min(r, s); tax += c * rate; r -= c; if (r <= 0) break; }
