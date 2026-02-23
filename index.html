@@ -189,6 +189,32 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
 
 /* Hidden province-specific elements */
 .qc-only{display:none;}
+
+/* ── Advanced toggle button ── */
+.advanced-toggle{
+background:var(–surface2);border:1px solid var(–border);border-radius:6px;
+color:var(–muted);font-family:‘DM Mono’,ui-monospace,monospace;
+font-size:11px;letter-spacing:.06em;padding:7px 14px;cursor:pointer;
+display:flex;align-items:center;gap:6px;transition:all .2s;white-space:nowrap;
+}
+.advanced-toggle:hover{border-color:var(–accent3);color:var(–accent3);}
+.advanced-toggle.on{background:rgba(255,217,102,.08);border-color:var(–accent3);color:var(–accent3);}
+.adv-status{font-weight:600;letter-spacing:.1em;}
+.adv-icon{font-size:12px;}
+
+/* ── Basic mode card ── */
+.basic-mode{display:block;}
+.basic-mode.hidden{display:none;}
+.advanced-mode{display:none;}
+.advanced-mode.visible{display:contents;}
+
+.basic-card{grid-column:1/-1;background:var(–surface);border:1px solid var(–border);border-radius:8px;padding:24px;}
+.basic-section-title{font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(–muted);margin:20px 0 12px;padding-top:16px;border-top:1px solid var(–border);}
+.basic-section-title:first-of-type{margin-top:0;padding-top:0;border-top:none;}
+.basic-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+@media(max-width:580px){.basic-grid{grid-template-columns:1fr;}}
+.basic-desc{font-size:11px;color:var(–muted);margin-bottom:20px;line-height:1.7;padding:10px 14px;background:rgba(61,255,160,.04);border-left:2px solid rgba(61,255,160,.3);border-radius:0 6px 6px 0;}
+.basic-desc strong{color:var(–accent);}
 </style>
 
 </head>
@@ -212,6 +238,9 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
       <option value="NL">Newfoundland & Labrador</option>
     </select></div>
     <span class="prov-badge" id="provBadge">QC · Dual Return</span>
+    <button class="advanced-toggle" id="advancedToggle" onclick="toggleAdvanced()">
+      <span class="adv-icon">⚡</span> Advanced <span class="adv-status" id="advStatus">OFF</span>
+    </button>
   </div>
 
   <header>
@@ -223,6 +252,126 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
   <div class="grid">
 
 ```
+<!-- ══ BASIC MODE ══ -->
+<div class="basic-mode" id="basicMode">
+  <div class="basic-card full-width">
+    <div class="card-title">2025 Tax Estimate</div>
+    <p class="basic-desc">Enter your numbers below for a quick estimate. <strong>Switch to Advanced</strong> for full breakdown — referee expenses, all deductions, investment details, and province-by-province comparison.</p>
+
+    <div class="basic-section-title">Income</div>
+    <div class="basic-grid">
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label>Employment Income ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-emp')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-emp"><span class="tooltip-close" onclick="closeTip('btip-emp')">✕</span><h4>Employment Income</h4><div class="tp-section"><div class="tp-label">Where to find it</div><div class="tp-val"><strong>T4 Box 14</strong> — your gross salary before any deductions. If you have multiple jobs, add all T4s together.</div></div></div>
+        <input type="number" id="b-employment" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label>Self-Employment / Other Income ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-se')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-se"><span class="tooltip-close" onclick="closeTip('btip-se')">✕</span><h4>Self-Employment & Other Income</h4><div class="tp-section"><div class="tp-label">Includes</div><div class="tp-val">Referee fees, freelance, tips, rental income, T4A income. Enter your <strong>net</strong> amount after basic expenses if you know them, or gross revenue if unsure.</div></div></div>
+        <input type="number" id="b-se" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label>Investment Income ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-inv')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-inv"><span class="tooltip-close" onclick="closeTip('btip-inv')">✕</span><h4>Investment Income</h4><div class="tp-section"><div class="tp-label">Includes</div><div class="tp-val">Interest (T5 Box 13), dividends (T5), capital gains (T5008). For a quick estimate, add all investment income together. <strong>Advanced mode</strong> handles each type separately with proper gross-ups.</div></div></div>
+        <input type="number" id="b-invest" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label>Other Taxable Income ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-other')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-other"><span class="tooltip-close" onclick="closeTip('btip-other')">✕</span><h4>Other Taxable Income</h4><div class="tp-section"><div class="tp-label">Includes</div><div class="tp-val">RRSP withdrawals (T4RSP), pension income (T4A), EI benefits (T4E), rental income. All taxed at your marginal rate.</div></div></div>
+        <input type="number" id="b-other" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+    </div>
+
+    <div class="basic-section-title">Deductions</div>
+    <div class="basic-grid">
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label>RRSP Contributions ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-rrsp')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-rrsp"><span class="tooltip-close" onclick="closeTip('btip-rrsp')">✕</span><h4>RRSP</h4><div class="tp-section"><div class="tp-label">Effect</div><div class="tp-val">Reduces taxable income dollar-for-dollar. Max <strong>$32,490</strong> for 2025. Check My CRA Account for your personal limit. Deadline: <strong>March 3, 2026</strong> for the 2025 tax year.</div></div></div>
+        <input type="number" id="b-rrsp" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label>FHSA Contributions ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-fhsa')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-fhsa"><span class="tooltip-close" onclick="closeTip('btip-fhsa')">✕</span><h4>FHSA — First Home Savings Account</h4><div class="tp-section"><div class="tp-label">Effect</div><div class="tp-val">Deductible now <strong>AND</strong> tax-free withdrawal for first home. Max <strong>$8,000/yr</strong>, lifetime $40,000. Best of RRSP + TFSA combined.</div></div></div>
+        <input type="number" id="b-fhsa" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label>Other Deductions ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-otherded')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-otherded"><span class="tooltip-close" onclick="closeTip('btip-otherded')">✕</span><h4>Other Deductions</h4><div class="tp-section"><div class="tp-label">Includes</div><div class="tp-val">Union dues (T4 Box 44), childcare expenses, moving expenses, student loan interest, employment expenses. All reduce taxable income.</div></div></div>
+        <input type="number" id="b-otherded" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+    </div>
+
+    <div class="basic-section-title">Tax Already Withheld</div>
+    <div class="basic-grid">
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label>Federal Tax Withheld ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-fedwith')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-fedwith"><span class="tooltip-close" onclick="closeTip('btip-fedwith')">✕</span><h4>Federal Tax Withheld</h4><div class="tp-section"><div class="tp-label">Where to find it</div><div class="tp-val"><strong>T4 Box 22</strong> — income tax deducted by your employer throughout the year.</div></div></div>
+        <input type="number" id="b-fedwith" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+      <div class="field field-wrap">
+        <div class="field-header">
+          <label id="b-provwith-label">Provincial Tax Withheld ($)</label>
+          <span class="tooltip-btn" onclick="toggleTip('btip-provwith')">?</span>
+        </div>
+        <div class="tooltip-popup" id="btip-provwith"><span class="tooltip-close" onclick="closeTip('btip-provwith')">✕</span><h4>Provincial Tax Withheld</h4><div class="tp-section"><div class="tp-label" id="btip-provwith-label-inner">Where to find it</div><div class="tp-val" id="btip-provwith-val">QC: <strong>RL-1 Box E</strong>. Other provinces: included in T4 Box 22 (combined with federal).</div></div></div>
+        <input type="number" id="b-provwith" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      </div>
+
+    </div>
+
+    <!-- Basic Results -->
+    <div id="basicResults" style="margin-top:24px;display:none;">
+      <div style="border-top:1px solid var(--border);padding-top:20px;">
+        <div class="card-title" style="margin-bottom:16px;">Quick Estimate</div>
+        <div class="results-grid" id="basicSummaryCards"></div>
+        <div class="effective-rate-bar" style="margin-top:16px;"><div class="fill" id="basicRateBar" style="width:0%"></div></div>
+        <div class="rate-labels"><span>0%</span><span id="basicRateLabel">Effective rate: —</span><span>55%</span></div>
+        <div style="margin-top:14px;font-size:10px;color:#4a5268;text-align:center;">Quick estimate — switch to <strong style="color:var(--accent3)">Advanced</strong> for full breakdown including SE expenses, all credits, and detailed provincial calculations.</div>
+      </div>
+    </div>
+
+    <button class="calc-btn" style="margin-top:20px;" onclick="basicCalculate()">↳ ESTIMATE MY 2025 TAXES</button>
+  </div>
+</div>
+
+<!-- ══ ADVANCED MODE WRAPPER ══ -->
+<div class="advanced-mode" id="advancedMode">
+
 <!-- ══ MARGINAL RATE INDICATOR ══ -->
 <div class="marginal-bar full-width" id="marginalBar">
   <span class="marginal-label">Your next dollar is taxed at →</span>
@@ -619,6 +768,8 @@ header p{color:var(–muted);margin-top:8px;font-size:12px;}
   </div>
   <div class="breakdown" id="breakdownSection"></div>
 </div>
+
+</div><!-- /advancedMode -->
 
 <div class="tip-box full-width" id="tipBox"></div>
 <div class="disclaimer full-width" id="legalDisclaimer">
@@ -1524,6 +1675,8 @@ function switchProvince() {
 
   // Hide results (province changed = recalculate)
   document.getElementById('results').style.display = 'none';
+  document.getElementById('basicResults').style.display = 'none';
+  updateBasicProvLabel();
 }
 
 // ════════════════════════════════════════════════════════
@@ -1878,10 +2031,184 @@ function calculate(){
 }
 
 // ════════════════════════════════════════════════════════
+// BASIC / ADVANCED TOGGLE
+// ════════════════════════════════════════════════════════
+let advancedOn = false;
+
+function toggleAdvanced() {
+  advancedOn = !advancedOn;
+  const btn = document.getElementById('advancedToggle');
+  const status = document.getElementById('advStatus');
+  const basicEl = document.getElementById('basicMode');
+  const advEl = document.getElementById('advancedMode');
+  const tipBox = document.getElementById('tipBox');
+
+  if (advancedOn) {
+    btn.classList.add('on');
+    status.textContent = 'ON';
+    basicEl.classList.add('hidden');
+    advEl.classList.add('visible');
+    tipBox.style.display = 'block';
+    // Sync basic inputs → advanced if user entered values in basic mode
+    syncBasicToAdvanced();
+  } else {
+    btn.classList.remove('on');
+    status.textContent = 'OFF';
+    basicEl.classList.remove('hidden');
+    advEl.classList.remove('visible');
+    tipBox.style.display = 'none';
+    // Sync advanced inputs → basic
+    syncAdvancedToBasic();
+  }
+  document.getElementById('results').style.display = 'none';
+}
+
+function syncBasicToAdvanced() {
+  // Map basic fields → their advanced equivalents where they exist
+  const emp = +document.getElementById('b-employment').value||0;
+  const fedW = +document.getElementById('b-fedwith').value||0;
+  const provW = +document.getElementById('b-provwith').value||0;
+  const rrsp = +document.getElementById('b-rrsp').value||0;
+  const fhsa = +document.getElementById('b-fhsa').value||0;
+  if (emp) setIfEmpty('employment', emp);
+  if (fedW) setIfEmpty('federalWithheld', fedW);
+  if (provW) setIfEmpty('provincialWithheld', provW);
+  if (rrsp) setIfEmpty('rrsp', rrsp);
+  if (fhsa) setIfEmpty('fhsa', fhsa);
+  updatePensionDisplay();
+  updateMarginalRate();
+}
+
+function syncAdvancedToBasic() {
+  const emp = +document.getElementById('employment').value||0;
+  const fedW = +document.getElementById('federalWithheld').value||0;
+  const provW = +document.getElementById('provincialWithheld').value||0;
+  const rrsp = +document.getElementById('rrsp').value||0;
+  const fhsa = +document.getElementById('fhsa').value||0;
+  const seRev = +document.getElementById('seRevenue').value||0;
+  if (emp) setIfEmpty('b-employment', emp);
+  if (fedW) setIfEmpty('b-fedwith', fedW);
+  if (provW) setIfEmpty('b-provwith', provW);
+  if (rrsp) setIfEmpty('b-rrsp', rrsp);
+  if (fhsa) setIfEmpty('b-fhsa', fhsa);
+  if (seRev) setIfEmpty('b-se', seRev);
+}
+
+function setIfEmpty(id, val) {
+  const el = document.getElementById(id);
+  if (el && !el.value) el.value = val || '';
+}
+
+// ════════════════════════════════════════════════════════
+// BASIC CALCULATOR ENGINE
+// ════════════════════════════════════════════════════════
+function basicLiveUpdate() {
+  const emp = +document.getElementById('b-employment').value||0;
+  const se = +document.getElementById('b-se').value||0;
+  if (emp + se > 0) {
+    updateBasicMarginalChip(emp + se);
+  }
+  // Auto-calculate as user types if results already shown
+  if (document.getElementById('basicResults').style.display !== 'none') {
+    basicCalculate();
+  }
+}
+
+function updateBasicMarginalChip(income) {
+  // Show marginal rate hint below income fields in basic mode
+  const p = getP();
+  const fedBracketsRaw = [[57375,0.145],[57375,0.205],[63132,0.26],[75532,0.29],[Infinity,0.33]];
+  let fedRate = 0.145, cum = 16129;
+  for (const [s,r] of fedBracketsRaw) { cum += s; if (income < cum) { fedRate = r; break; } fedRate = r; }
+  const fedEff = fedRate * (1 - p.abatement);
+  let provRate = p.provBrackets[0][1], cumP = p.provBPA;
+  for (const [s,r] of p.provBrackets) { cumP += s; if (income < cumP) { provRate = r; break; } provRate = r; }
+}
+
+function basicCalculate() {
+  const p = getP();
+  const isQC = p.pensionPlan === 'QPP';
+
+  const emp      = +document.getElementById('b-employment').value||0;
+  const se       = +document.getElementById('b-se').value||0;
+  const invest   = +document.getElementById('b-invest').value||0;
+  const other    = +document.getElementById('b-other').value||0;
+  const rrsp     = +document.getElementById('b-rrsp').value||0;
+  const fhsa     = +document.getElementById('b-fhsa').value||0;
+  const otherDed = +document.getElementById('b-otherded').value||0;
+  const fedWith  = +document.getElementById('b-fedwith').value||0;
+  const provWith = +document.getElementById('b-provwith').value||0;
+
+  const totalIncome = emp + se + invest + other;
+  if (totalIncome <= 0) return;
+
+  // Estimate payroll (CPP/QPP + EI) for credit calculation
+  const pensionable = Math.max(0, Math.min(emp, p.pensionCeiling) - 3500);
+  const pensionEst  = Math.min(pensionable * p.pensionRate, p.pensionMax);
+  const eiEst       = Math.min(emp * p.eiRate, p.eiMax);
+  const sePensionEst = Math.min(se * p.pensionSERate, p.pensionSEMax);
+  const sePensionDeduct = sePensionEst / 2;
+
+  const totalDeductions = rrsp + fhsa + otherDed + sePensionDeduct;
+  const taxableIncome   = Math.max(0, totalIncome - totalDeductions);
+
+  // Federal tax
+  const fedBPA = 16129;
+  let fedTax = federalTax(Math.max(0, taxableIncome - fedBPA));
+  // Federal credits
+  const fedCredits = pensionEst * 0.15 + (sePensionEst/2) * 0.15 + eiEst * 0.15;
+  fedTax = Math.max(0, fedTax - fedCredits);
+  const abate = fedTax * p.abatement;
+  fedTax = fedTax - abate;
+
+  // Provincial tax
+  let pTax = provTax(Math.max(0, taxableIncome - p.provBPA));
+  const provCredits = pensionEst * p.pensionProvCreditRate + (sePensionEst/2) * p.pensionProvCreditRate + eiEst * p.eiProvCreditRate;
+  pTax = Math.max(0, pTax - provCredits);
+
+  const totalTax = fedTax + pTax;
+  const fedBal   = fedTax - fedWith;
+  const provBal  = pTax - provWith;
+  const combBal  = fedBal + provBal;
+  const afterTax = totalIncome - totalTax - pensionEst - eiEst;
+  const effRate  = totalIncome > 0 ? (totalTax / totalIncome) * 100 : 0;
+
+  // Display
+  document.getElementById('basicResults').style.display = 'block';
+  const balClass = v => v > 0 ? 'warn' : v < 0 ? 'pos' : 'rv';
+  document.getElementById('basicSummaryCards').innerHTML = `
+    <div class="result-item"><div class="rl">Total Tax</div><div class="rv">${fmt(totalTax)}</div><div class="rs">Fed + ${p.name}</div></div>
+    <div class="result-item"><div class="rl">Federal Balance</div><div class="rv ${balClass(fedBal)}">${fedBal>=0?fmt(fedBal):'−'+fmt(fedBal)}</div><div class="rs">${fedBal>=0?'You owe CRA':'CRA refunds you'}</div></div>
+    <div class="result-item"><div class="rl">${p.name} Balance</div><div class="rv ${balClass(provBal)}">${provBal>=0?fmt(provBal):'−'+fmt(provBal)}</div><div class="rs">${provBal>=0?'You owe province':'Province refunds you'}</div></div>
+    <div class="result-item"><div class="rl">Net Balance</div><div class="rv ${balClass(combBal)}">${combBal>=0?fmt(combBal):'−'+fmt(combBal)}</div><div class="rs">${combBal>=0?'Total owed':'Total refund'}</div></div>
+    <div class="result-item"><div class="rl">After-Tax Income</div><div class="rv pos">${fmt(afterTax)}</div><div class="rs">After tax + payroll</div></div>
+    <div class="result-item"><div class="rl">Effective Rate</div><div class="rv">${effRate.toFixed(1)}%</div><div class="rs">Combined fed + prov</div></div>
+  `;
+  const barPct = Math.min(effRate / 55 * 100, 100);
+  document.getElementById('basicRateBar').style.width = barPct + '%';
+  document.getElementById('basicRateLabel').textContent = `Combined effective rate: ${effRate.toFixed(1)}%`;
+}
+
+// Update basic province-specific label
+function updateBasicProvLabel() {
+  const p = getP();
+  const isQC = p.pensionPlan === 'QPP';
+  const lbl = document.getElementById('b-provwith-label');
+  const inner = document.getElementById('btip-provwith-val');
+  if (lbl) lbl.textContent = isQC ? 'Québec Tax Withheld ($) — RL-1 Box E' : `${p.name} Tax Withheld ($) — T4 Box 22`;
+  if (inner) inner.innerHTML = isQC
+    ? '<strong>RL-1 Box E</strong> — Québec income tax withheld by employer.'
+    : `<strong>T4 Box 22</strong> — Federal + provincial tax are combined on one slip for ${p.name} residents.`;
+}
+
+// ════════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   switchProvince(); // init with QC
+  updateBasicProvLabel();
+  // Tip box hidden in basic mode by default
+  document.getElementById('tipBox').style.display = 'none';
 });
 </script>
 
