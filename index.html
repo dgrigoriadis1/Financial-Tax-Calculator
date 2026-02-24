@@ -3,15 +3,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Canadian Tax Calculator 2025</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════════
-   DARK MODE (DEFAULT)
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════
+   CSS CUSTOM PROPERTIES — DARK DEFAULT
+═══════════════════════════════════════ */
 :root {
   --bg: #111318;
   --bg2: #0d0f14;
@@ -25,28 +25,27 @@
   --muted: #9aa3b8;
   --muted2: #6b7a9a;
   --accent: #3dffa0;
-  --accent-dim: rgba(61,255,160,.12);
-  --accent-border: rgba(61,255,160,.28);
+  --accent-dim: rgba(61,255,160,0.12);
+  --accent-border: rgba(61,255,160,0.28);
   --accent2: #ff7070;
   --accent3: #ffd966;
   --federal: #6aa3ff;
-  --federal-dim: rgba(106,163,255,.12);
-  --federal-border: rgba(106,163,255,.28);
+  --federal-dim: rgba(106,163,255,0.12);
+  --federal-border: rgba(106,163,255,0.28);
   --input-bg: #242840;
   --tooltip-bg: #181e30;
-  --tooltip-border: rgba(61,255,160,.45);
   --chat-bg: #161a28;
   --result-pos: #3dffa0;
   --result-neg: #ff7070;
   --result-warn: #ffd966;
-  --legal-bg: rgba(255,112,112,.04);
-  --legal-border: rgba(255,112,112,.2);
+  --legal-bg: rgba(255,112,112,0.04);
+  --legal-border: rgba(255,112,112,0.2);
 }
 
-/* ═══════════════════════════════════════════
-LIGHT MODE — full site overhaul
-═══════════════════════════════════════════ */
-body.light {
+/* ═══════════════════════════════════════
+LIGHT MODE
+═══════════════════════════════════════ */
+body.light-mode {
 –bg: #f0f3f8;
 –bg2: #e6eaf4;
 –surface: #ffffff;
@@ -59,443 +58,860 @@ body.light {
 –muted: #556072;
 –muted2: #7a8899;
 –accent: #0a7a4a;
-–accent-dim: rgba(10,122,74,.1);
-–accent-border: rgba(10,122,74,.3);
+–accent-dim: rgba(10,122,74,0.1);
+–accent-border: rgba(10,122,74,0.3);
 –accent2: #c02020;
 –accent3: #8a6200;
 –federal: #1a4eb8;
-–federal-dim: rgba(26,78,184,.1);
-–federal-border: rgba(26,78,184,.3);
+–federal-dim: rgba(26,78,184,0.1);
+–federal-border: rgba(26,78,184,0.3);
 –input-bg: #eef1f8;
 –tooltip-bg: #1e2438;
-–tooltip-border: rgba(61,255,160,.5);
 –chat-bg: #e8ecf6;
 –result-pos: #0a7a4a;
 –result-neg: #c02020;
 –result-warn: #8a6200;
-–legal-bg: rgba(180,50,50,.04);
-–legal-border: rgba(180,50,50,.2);
+–legal-bg: rgba(180,50,50,0.04);
+–legal-border: rgba(180,50,50,0.2);
 }
 
-/* ═══════════════════════════════════════════
-BASE
-═══════════════════════════════════════════ */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ═══════════════════════════════════════
+RESET & BASE — Safari compatible
+═══════════════════════════════════════ */
+*, *:before, *:after { -webkit-box-sizing: border-box; box-sizing: border-box; margin: 0; padding: 0; }
+
+html { -webkit-text-size-adjust: 100%; }
+
 body {
-background: var(–bg);
+/* Explicit fallback first, then var() */
+background-color: #111318;
+background-color: var(–bg);
+color: #f0f2fa;
 color: var(–text);
 font-family: ‘DM Mono’, ui-monospace, ‘Courier New’, monospace;
 font-size: 13px;
 min-height: 100vh;
 padding: 32px 16px 60px;
-transition: background .25s, color .25s;
+-webkit-transition: background-color 0.25s, color 0.25s;
+transition: background-color 0.25s, color 0.25s;
 }
-body::before {
+
+/* Grid bg - no inset, use explicit top/right/bottom/left */
+body:before {
 content: ‘’;
-position: fixed; inset: 0; z-index: 0; pointer-events: none;
+position: fixed;
+top: 0; right: 0; bottom: 0; left: 0;
+z-index: 0;
+pointer-events: none;
 background-image:
-repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(128,128,128,.03) 40px),
-repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(128,128,128,.03) 40px);
+repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(128,128,128,0.03) 40px),
+repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(128,128,128,0.03) 40px);
 }
+
 .container { max-width: 960px; margin: 0 auto; position: relative; z-index: 1; }
 
-/* ═══════════════════════════════════════════
-THEME TOGGLE — top-right fixed
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════
+THEME TOGGLE
+═══════════════════════════════════════ */
 .theme-btn {
-position: fixed; top: 14px; right: 14px; z-index: 999;
-background: var(–surface); border: 1px solid var(–border);
-border-radius: 20px; padding: 6px 12px 6px 8px;
-cursor: pointer; display: flex; align-items: center; gap: 7px;
-font-family: ‘DM Mono’, monospace; font-size: 11px; color: var(–muted);
-transition: all .2s; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+position: fixed;
+top: 14px; right: 14px; z-index: 9999;
+background-color: #1c2030;
+background-color: var(–surface);
+border: 1px solid #343a52;
+border: 1px solid var(–border);
+border-radius: 20px;
+padding: 6px 12px 6px 8px;
+cursor: pointer;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 7px;
+font-family: ‘DM Mono’, monospace;
+font-size: 11px;
+color: #9aa3b8;
+color: var(–muted);
+-webkit-transition: all 0.2s; transition: all 0.2s;
+box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+outline: none;
+/* Ensure clickable on iOS */
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
 }
-.theme-btn:hover { border-color: var(–accent); color: var(–accent); }
 .theme-track {
-width: 28px; height: 16px; background: var(–surface2);
-border: 1px solid var(–border); border-radius: 8px;
-position: relative; transition: all .2s; flex-shrink: 0;
+width: 28px; height: 16px;
+background-color: #242840;
+background-color: var(–surface2);
+border: 1px solid #343a52;
+border: 1px solid var(–border);
+border-radius: 8px;
+position: relative;
+-webkit-transition: all 0.2s; transition: all 0.2s;
+-webkit-flex-shrink: 0; flex-shrink: 0;
 }
-.theme-track.on { background: var(–accent-dim); border-color: var(–accent); }
+.theme-track.on {
+background-color: rgba(61,255,160,0.12);
+background-color: var(–accent-dim);
+border-color: rgba(61,255,160,0.28);
+border-color: var(–accent-border);
+}
 .theme-thumb {
-width: 10px; height: 10px; border-radius: 50%; background: var(–muted);
-position: absolute; top: 2px; left: 2px; transition: transform .2s, background .2s;
+width: 10px; height: 10px;
+border-radius: 50%;
+background-color: #9aa3b8;
+background-color: var(–muted);
+position: absolute;
+top: 2px; left: 2px;
+-webkit-transition: -webkit-transform 0.2s, background-color 0.2s;
+transition: transform 0.2s, background-color 0.2s;
 }
-.theme-track.on .theme-thumb { transform: translateX(12px); background: var(–accent); }
+.theme-track.on .theme-thumb {
+-webkit-transform: translateX(12px); transform: translateX(12px);
+background-color: #3dffa0;
+background-color: var(–accent);
+}
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════
 PROVINCE BAR
-═══════════════════════════════════════════ */
+═══════════════════════════════════════ */
 .province-bar {
-display: flex; align-items: center; gap: 12px;
-background: var(–surface); border: 1px solid var(–border);
-border-radius: 10px; padding: 12px 16px; margin-bottom: 24px; flex-wrap: wrap;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 12px;
+background-color: var(–surface);
+border: 1px solid var(–border);
+border-radius: 10px;
+padding: 12px 16px;
+margin-bottom: 24px;
+-webkit-flex-wrap: wrap; flex-wrap: wrap;
 }
-.province-bar > label { font-size: 10px; text-transform: uppercase; letter-spacing: .15em; color: var(–muted); white-space: nowrap; }
-.select-wrap { position: relative; flex: 1; min-width: 160px; }
-.select-wrap::after { content: ‘▾’; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(–accent); font-size: 14px; pointer-events: none; }
+.province-bar > label {
+font-size: 10px; text-transform: uppercase;
+letter-spacing: 0.15em; color: var(–muted); white-space: nowrap;
+}
+.select-wrap { position: relative; -webkit-flex: 1; flex: 1; min-width: 160px; }
+.select-wrap:after {
+content: ‘\25BE’;
+position: absolute; right: 12px; top: 50%;
+-webkit-transform: translateY(-50%); transform: translateY(-50%);
+color: #3dffa0; color: var(–accent);
+font-size: 14px; pointer-events: none;
+}
 .province-select {
-width: 100%; -webkit-appearance: none; -moz-appearance: none; appearance: none;
-background: var(–input-bg) !important;
-border: 1px solid var(–accent) !important;
-border-radius: 6px; color: var(–accent) !important; -webkit-text-fill-color: var(–accent);
-font-family: ‘DM Mono’, monospace; font-size: 13px; font-weight: 500;
-padding: 8px 32px 8px 14px; cursor: pointer; outline: none;
+width: 100%;
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+background-color: var(–input-bg);
+border: 1px solid var(–accent);
+border-radius: 6px;
+color: var(–accent);
+-webkit-text-fill-color: var(–accent);
+font-family: ‘DM Mono’, monospace;
+font-size: 13px; font-weight: 500;
+padding: 8px 32px 8px 14px;
+cursor: pointer; outline: none;
+touch-action: manipulation;
 }
-.province-select option { background: var(–surface) !important; color: var(–text) !important; }
+.province-select option {
+background-color: var(–surface);
+color: var(–text);
+}
 .prov-badge {
-font-size: 10px; background: var(–accent-dim); border: 1px solid var(–accent-border);
-border-radius: 4px; padding: 3px 10px; color: var(–accent); letter-spacing: .08em; white-space: nowrap;
+font-size: 10px;
+background-color: var(–accent-dim);
+border: 1px solid var(–accent-border);
+border-radius: 4px; padding: 3px 10px;
+color: var(–accent); letter-spacing: 0.08em; white-space: nowrap;
 }
 .adv-toggle {
-background: var(–surface2); border: 1px solid var(–border); border-radius: 6px;
-color: var(–muted); font-family: ‘DM Mono’, monospace; font-size: 11px;
-letter-spacing: .06em; padding: 7px 14px; cursor: pointer;
-display: flex; align-items: center; gap: 6px; transition: all .2s; white-space: nowrap;
+background-color: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 6px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+font-size: 11px; letter-spacing: 0.06em;
+padding: 7px 14px;
+cursor: pointer;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+gap: 6px;
+-webkit-transition: all 0.2s; transition: all 0.2s;
+white-space: nowrap;
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+outline: none;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
 }
-.adv-toggle:hover { border-color: var(–accent3); color: var(–accent3); }
-.adv-toggle.on { background: rgba(255,217,102,.1); border-color: var(–accent3); color: var(–accent3); }
-.adv-status { font-weight: 600; letter-spacing: .1em; }
+.adv-toggle.on {
+background-color: rgba(255,217,102,0.1);
+border-color: #ffd966; border-color: var(–accent3);
+color: #ffd966; color: var(–accent3);
+}
+.adv-status { font-weight: 600; letter-spacing: 0.1em; }
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════
 HEADER
-═══════════════════════════════════════════ */
+═══════════════════════════════════════ */
 header { margin-bottom: 20px; border-left: 3px solid var(–accent); padding-left: 20px; }
-.year-badge { font-size: 11px; color: var(–accent); letter-spacing: .15em; text-transform: uppercase; margin-bottom: 8px; }
-header h1 { font-family: ‘DM Serif Display’, Georgia, serif; font-size: clamp(24px,5vw,40px); line-height: 1.1; color: var(–text); }
+.year-badge { font-size: 11px; color: var(–accent); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+header h1 {
+font-family: ‘DM Serif Display’, Georgia, serif;
+font-size: 36px; line-height: 1.1; color: var(–text);
+}
+@media(max-width: 480px) { header h1 { font-size: 28px; } }
 header h1 em { color: var(–accent); font-style: italic; }
 header p { color: var(–muted); margin-top: 8px; font-size: 12px; }
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════
 TAB NAV
-═══════════════════════════════════════════ */
+═══════════════════════════════════════ */
 .tab-nav {
-display: flex; background: var(–surface); border: 1px solid var(–border);
+display: -webkit-flex; display: flex;
+background-color: var(–surface);
+border: 1px solid var(–border);
 border-radius: 10px; padding: 5px; margin-bottom: 20px;
 }
 .tab-btn {
-flex: 1; background: transparent; border: none; border-radius: 7px;
-color: var(–muted); font-family: ‘DM Mono’, monospace; font-size: 12px;
-letter-spacing: .06em; padding: 11px 16px; cursor: pointer; transition: all .25s;
-display: flex; align-items: center; justify-content: center; gap: 7px;
+-webkit-flex: 1; flex: 1;
+background: transparent; border: none; border-radius: 7px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+font-size: 12px; letter-spacing: 0.06em;
+padding: 11px 16px;
+cursor: pointer;
+-webkit-transition: all 0.25s; transition: all 0.25s;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+gap: 7px;
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+outline: none;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
 }
-.tab-btn.active { background: var(–surface2); color: var(–text); box-shadow: 0 1px 6px rgba(0,0,0,.2); }
+.tab-btn.active {
+background-color: var(–surface2);
+color: var(–text);
+box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+}
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════
 SLIDING PANELS
-═══════════════════════════════════════════ */
+═══════════════════════════════════════ */
 .tab-slider-wrap { overflow: hidden; width: 100%; }
-.tab-slider { display: flex; transition: transform .35s cubic-bezier(.4,0,.2,1); width: 200%; }
-.tab-panel { width: 50%; min-width: 50%; flex-shrink: 0; }
+.tab-slider {
+display: -webkit-flex; display: flex;
+-webkit-transition: -webkit-transform 0.35s cubic-bezier(0.4,0,0.2,1);
+transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+width: 200%;
+}
+.tab-panel { width: 50%; min-width: 50%; -webkit-flex-shrink: 0; flex-shrink: 0; }
 
-/* ═══════════════════════════════════════════
-GRID & CARDS
-═══════════════════════════════════════════ */
-.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-@media(max-width:680px) { .grid { grid-template-columns: 1fr; } }
-.full-width { grid-column: 1 / -1; }
+/* ═══════════════════════════════════════
+GRID
+═══════════════════════════════════════ */
+.grid {
+display: -webkit-flex; display: flex;
+-webkit-flex-wrap: wrap; flex-wrap: wrap;
+gap: 16px;
+}
+.grid > * { min-width: 0; }
+.half { width: calc(50% - 8px); }
+.full-width { width: 100%; }
+@media(max-width: 680px) { .half { width: 100%; } }
+
+/* ═══════════════════════════════════════
+CARDS
+═══════════════════════════════════════ */
 .card {
-background: var(–surface); border: 1px solid var(–border);
+background-color: var(–surface);
+border: 1px solid var(–border);
 border-radius: 8px; padding: 20px;
+width: 100%;
 }
-.card-title { font-size: 10px; text-transform: uppercase; letter-spacing: .15em; color: var(–muted); margin-bottom: 16px; }
+.card-title {
+font-size: 10px; text-transform: uppercase;
+letter-spacing: 0.15em; color: var(–muted);
+margin-bottom: 16px;
+}
 
-/* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════
 FIELDS
-═══════════════════════════════════════════ */
+═══════════════════════════════════════ */
 .field { margin-bottom: 14px; }
-.field label { display: block; font-size: 11px; color: var(–muted); margin-bottom: 5px; letter-spacing: .04em; }
-.field input {
-width: 100%; background: var(–input-bg); border: 1px solid var(–border);
-border-radius: 5px; color: var(–text); font-family: ‘DM Mono’, monospace;
-font-size: 13px; padding: 9px 12px; outline: none; transition: border-color .15s;
+.field label {
+display: block; font-size: 11px;
+color: var(–muted); margin-bottom: 5px;
+letter-spacing: 0.04em;
 }
-.field input:focus { border-color: var(–accent); }
-.hint { font-size: 10px; color: var(–muted); margin-top: 4px; line-height: 1.5; opacity: .8; }
-.field-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+.field input[type=“number”] {
+width: 100%;
+background-color: var(–input-bg);
+border: 1px solid var(–border);
+border-radius: 5px;
+color: var(–text);
+-webkit-text-fill-color: var(–text);
+font-family: ‘DM Mono’, monospace;
+font-size: 13px; padding: 9px 12px;
+outline: none;
+-webkit-transition: border-color 0.15s; transition: border-color 0.15s;
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+}
+.field input[type=“number”]:focus { border-color: var(–accent); }
+.hint { font-size: 10px; color: var(–muted); margin-top: 4px; line-height: 1.5; opacity: 0.8; }
+.field-header {
+display: -webkit-flex; display: flex;
+-webkit-justify-content: space-between; justify-content: space-between;
+-webkit-align-items: center; align-items: center;
+margin-bottom: 5px;
+}
 .field-header label { margin-bottom: 0; }
 .field-wrap { position: relative; }
 
-/* ═══════════════════════════════════════════
-TOOLTIPS — match the exact style from pic 3
-═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════
+TOOLTIPS — always dark overlay
+═══════════════════════════════════════ */
 .tooltip-btn {
-width: 17px; height: 17px; border-radius: 50%;
-background: var(–surface2); border: 1px solid var(–border2);
-color: var(–muted); font-size: 9px; font-weight: 600; cursor: pointer;
-display: flex; align-items: center; justify-content: center;
-transition: all .15s; flex-shrink: 0; line-height: 1;
+width: 18px; height: 18px; border-radius: 50%;
+background-color: var(–surface2);
+border: 1px solid var(–border2);
+color: var(–muted);
+font-size: 9px; font-weight: 600;
+cursor: pointer;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-justify-content: center; justify-content: center;
+-webkit-transition: all 0.15s; transition: all 0.15s;
+-webkit-flex-shrink: 0; flex-shrink: 0;
 font-family: ‘DM Mono’, monospace;
+line-height: 1;
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+outline: none;
+border: none;
+-webkit-tap-highlight-color: transparent;
+touch-action: manipulation;
 }
-.tooltip-btn:hover { border-color: var(–accent); color: var(–accent); }
-/* Tooltip popups always render dark — better readability */
+.tooltip-btn:hover, .tooltip-btn:active { border-color: var(–accent); color: var(–accent); }
+
 .tooltip-popup {
 display: none;
 position: absolute; z-index: 500;
-background: #181e30;
-border: 1px solid rgba(61,255,160,.45);
+background-color: #181e30;
+border: 1px solid rgba(61,255,160,0.45);
 border-radius: 10px; padding: 16px 18px;
-width: min(320px, 92vw);
-font-size: 12px; line-height: 1.75; color: #c8d0e8;
-box-shadow: 0 16px 48px rgba(0,0,0,.7);
+width: 300px; max-width: 90vw;
+font-size: 12px; line-height: 1.75;
+color: #c8d0e8;
+box-shadow: 0 16px 48px rgba(0,0,0,0.7);
 top: calc(100% + 6px); right: 0;
+/* Ensure tooltip appears above everything */
+-webkit-transform: translateZ(0); transform: translateZ(0);
 }
 .tooltip-popup.active { display: block; }
-.tooltip-popup h4 { color: #3dffa0; font-size: 12px; margin-bottom: 12px; font-weight: 500; letter-spacing: .03em; }
-.tooltip-close { float: right; cursor: pointer; color: #6b7a9a; font-size: 16px; line-height: 1; margin-top: -2px; }
+.tooltip-popup h4 { color: #3dffa0; font-size: 12px; margin-bottom: 12px; font-weight: 500; }
+.tooltip-close {
+float: right; cursor: pointer;
+color: #6b7a9a; font-size: 16px; line-height: 1; margin-top: -2px;
+-webkit-tap-highlight-color: transparent; touch-action: manipulation;
+padding: 4px;
+}
 .tooltip-close:hover { color: #ff7070; }
 .tp-section { margin-bottom: 11px; }
-.tp-label { color: #d0d8f0; font-size: 10px; text-transform: uppercase; letter-spacing: .14em; margin-bottom: 5px; font-weight: 600; }
+.tp-label { color: #d0d8f0; font-size: 10px; text-transform: uppercase; letter-spacing: 0.14em; margin-bottom: 5px; font-weight: 600; }
 .tp-val { font-size: 11.5px; color: #a8b4cc; line-height: 1.8; }
 .tp-val strong { color: #ffd966; }
-.slip-row { display: flex; flex-direction: column; gap: 6px; margin-top: 3px; }
-.slip-badge { display: flex; align-items: flex-start; gap: 8px; background: rgba(255,255,255,.05); border-radius: 6px; padding: 6px 10px; border: 1px solid rgba(255,255,255,.08); }
-.slip-tag { font-size: 9px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; padding: 2px 7px; border-radius: 3px; flex-shrink: 0; line-height: 1.7; margin-top: 1px; }
-.slip-tag.fed { background: rgba(106,163,255,.2); color: #6aa3ff; border: 1px solid rgba(106,163,255,.3); }
-.slip-tag.prov { background: rgba(61,255,160,.15); color: #3dffa0; border: 1px solid rgba(61,255,160,.25); }
-.slip-tag.note { background: rgba(255,209,102,.15); color: #ffd966; border: 1px solid rgba(255,209,102,.25); }
+.slip-row { display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; gap: 6px; margin-top: 3px; }
+.slip-badge {
+display: -webkit-flex; display: flex;
+-webkit-align-items: flex-start; align-items: flex-start;
+gap: 8px; background-color: rgba(255,255,255,0.05);
+border-radius: 6px; padding: 6px 10px;
+border: 1px solid rgba(255,255,255,0.08);
+}
+.slip-tag {
+font-size: 9px; font-weight: 700;
+letter-spacing: 0.12em; text-transform: uppercase;
+padding: 2px 7px; border-radius: 3px;
+-webkit-flex-shrink: 0; flex-shrink: 0;
+line-height: 1.7; margin-top: 1px;
+}
+.slip-tag.fed { background-color: rgba(106,163,255,0.2); color: #6aa3ff; border: 1px solid rgba(106,163,255,0.3); }
+.slip-tag.prov { background-color: rgba(61,255,160,0.15); color: #3dffa0; border: 1px solid rgba(61,255,160,0.25); }
+.slip-tag.note { background-color: rgba(255,209,102,0.15); color: #ffd966; border: 1px solid rgba(255,209,102,0.25); }
 .slip-detail { font-size: 11px; color: #b8c8e0; line-height: 1.6; }
 .slip-detail strong { color: #e8edf8; }
 
-/* Sub-sections */
-.income-sub-section { background: var(–surface2); border: 1px solid var(–border); border-radius: 6px; padding: 14px; margin-bottom: 14px; }
-.income-sub-title { font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(–muted); margin-bottom: 12px; }
-.exp-breakdown-box { background: var(–surface2); border: 1px solid var(–border); border-radius: 6px; padding: 14px; margin-bottom: 14px; }
-.exp-breakdown-title { font-size: 9px; text-transform: uppercase; letter-spacing: .15em; color: var(–muted); margin-bottom: 12px; }
-.exp-total-row { border-top: 1px solid var(–border); margin-top: 4px; padding-top: 10px; display: flex; justify-content: space-between; font-size: 11px; }
+/* ═══════════════════════════════════════
+SUBSECTIONS
+═══════════════════════════════════════ */
+.income-sub-section {
+background-color: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 6px; padding: 14px; margin-bottom: 14px;
+}
+.income-sub-title { font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; color: var(–muted); margin-bottom: 12px; }
+.exp-breakdown-box {
+background-color: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 6px; padding: 14px; margin-bottom: 14px;
+}
+.exp-breakdown-title { font-size: 9px; text-transform: uppercase; letter-spacing: 0.15em; color: var(–muted); margin-bottom: 12px; }
+.exp-total-row {
+border-top: 1px solid var(–border);
+margin-top: 4px; padding-top: 10px;
+display: -webkit-flex; display: flex;
+-webkit-justify-content: space-between; justify-content: space-between;
+font-size: 11px;
+}
 
-/* CPP/QPP detail block */
-.cpp-detail-block { background: var(–surface2); border-radius: 6px; border: 1px solid var(–border); padding: 12px 14px; margin-top: 8px; font-size: 11px; display: none; }
+/* CPP/QPP detail */
+.cpp-detail-block {
+background-color: var(–surface2);
+border-radius: 6px; border: 1px solid var(–border);
+padding: 12px 14px; margin-top: 8px; font-size: 11px; display: none;
+}
 .cpp-detail-block.visible { display: block; }
-.cpp-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dotted var(–border); }
+.cpp-row {
+display: -webkit-flex; display: flex;
+-webkit-justify-content: space-between; justify-content: space-between;
+padding: 3px 0; border-bottom: 1px dotted var(–border);
+}
 .cpp-row:last-child { border-bottom: none; font-weight: 500; }
 .cpp-row .cl { color: var(–muted); }
 .cpp-row .cv { color: var(–text); }
 .cpp-row .cv.g { color: var(–accent); }
-.cpp-sub-title { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(–federal); margin: 10px 0 6px; }
+.cpp-sub-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(–federal); margin: 10px 0 6px; }
 
 /* Chat */
-.chat-toggle { font-size: 10px; color: var(–federal); background: var(–federal-dim); border: 1px dashed var(–federal-border); border-radius: 4px; padding: 4px 8px; cursor: pointer; margin-top: 5px; display: inline-block; transition: all .15s; letter-spacing: .05em; }
-.chat-toggle:hover { background: rgba(106,163,255,.18); }
-.chat-box { display: none; margin-top: 8px; background: var(–chat-bg); border: 1px solid var(–federal-border); border-radius: 6px; overflow: hidden; }
+.chat-toggle {
+font-size: 10px; color: var(–federal);
+background-color: var(–federal-dim);
+border: 1px dashed var(–federal-border);
+border-radius: 4px; padding: 4px 8px;
+cursor: pointer; margin-top: 5px; display: inline-block;
+-webkit-transition: all 0.15s; transition: all 0.15s;
+letter-spacing: 0.05em;
+-webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.chat-box { display: none; margin-top: 8px; background-color: var(–chat-bg); border: 1px solid var(–federal-border); border-radius: 6px; overflow: hidden; }
 .chat-box.open { display: block; }
 .chat-messages { padding: 10px 12px; min-height: 60px; max-height: 180px; overflow-y: auto; font-size: 11px; line-height: 1.6; }
-.chat-msg.user { color: var(–text); }
-.chat-msg.user::before { content: ’you → ’; color: var(–federal); }
-.chat-msg.ai { color: #a8d4ff; }
-.chat-msg.ai::before { content: ’calc → ’; color: var(–accent); }
 .chat-msg { margin-bottom: 8px; }
-.chat-input-row { display: flex; border-top: 1px solid var(–federal-border); }
-.chat-input-row input { flex: 1; background: transparent; border: none; outline: none; color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 8px 12px; }
-.chat-input-row input::placeholder { color: var(–muted2); }
-.chat-send { background: transparent; border: none; border-left: 1px solid var(–federal-border); color: var(–federal); cursor: pointer; padding: 0 12px; font-size: 12px; }
-.chat-send:hover { background: var(–federal-dim); }
-
-/* Calc buttons */
-.calc-btn {
-grid-column: 1 / -1; width: 100%; padding: 16px;
-background: var(–accent); color: #0d0f14;
-font-family: ‘DM Mono’, monospace; font-size: 13px; font-weight: 600;
-letter-spacing: .12em; border: none; border-radius: 8px;
-cursor: pointer; transition: all .15s; margin-top: 8px;
+.chat-msg.ai { color: #a8d4ff; }
+.chat-msg.ai:before { content: ’calc \2192 ’; color: #3dffa0; }
+.chat-input-row { display: -webkit-flex; display: flex; border-top: 1px solid var(–federal-border); }
+.chat-input-row input {
+-webkit-flex: 1; flex: 1;
+background: transparent; border: none; outline: none;
+color: var(–text); -webkit-text-fill-color: var(–text);
+font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 8px 12px;
 }
-.calc-btn:hover { opacity: .88; transform: translateY(-1px); }
+.chat-input-row input::-webkit-input-placeholder { color: var(–muted2); opacity: 1; }
+.chat-send {
+background: transparent; border: none;
+border-left: 1px solid var(–federal-border);
+color: var(–federal); cursor: pointer; padding: 0 12px; font-size: 12px;
+-webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
 
-/* Marginal rate bar */
-.marginal-bar { grid-column: 1/-1; background: var(–surface); border: 1px solid var(–border); border-radius: 8px; padding: 12px 16px; display: none; }
-.marginal-bar.visible { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
-.marginal-label { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(–muted); }
-.marginal-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Buttons */
+.calc-btn {
+width: 100%; padding: 16px;
+background-color: #3dffa0; background-color: var(–accent);
+color: #0d0f14;
+font-family: ‘DM Mono’, monospace;
+font-size: 13px; font-weight: 600; letter-spacing: 0.12em;
+border: none; border-radius: 8px;
+cursor: pointer;
+-webkit-transition: all 0.15s; transition: all 0.15s;
+margin-top: 8px;
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+outline: none;
+-webkit-tap-highlight-color: transparent; touch-action: manipulation;
+/* iOS needs display block for full-width buttons */
+display: block;
+}
+.calc-btn:active { opacity: 0.85; }
+
+/* Marginal bar */
+.marginal-bar {
+width: 100%;
+background-color: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px; padding: 12px 16px; display: none;
+-webkit-flex-wrap: wrap; flex-wrap: wrap;
+-webkit-align-items: center; align-items: center;
+gap: 10px;
+}
+.marginal-bar.visible { display: -webkit-flex; display: flex; }
+.marginal-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(–muted); }
+.marginal-chips { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 8px; }
 .mchip { font-size: 11px; padding: 4px 10px; border-radius: 5px; font-weight: 500; }
-.mchip.fed { background: var(–federal-dim); border: 1px solid var(–federal-border); color: var(–federal); }
-.mchip.prov { background: var(–accent-dim); border: 1px solid var(–accent-border); color: var(–accent); }
-.mchip.combined { background: rgba(255,217,102,.08); border: 1px solid rgba(255,217,102,.25); color: var(–accent3); }
+.mchip.fed { background-color: var(–federal-dim); border: 1px solid var(–federal-border); color: var(–federal); }
+.mchip.prov { background-color: var(–accent-dim); border: 1px solid var(–accent-border); color: var(–accent); }
+.mchip.combined { background-color: rgba(255,217,102,0.08); border: 1px solid rgba(255,217,102,0.25); color: var(–accent3); }
 
 /* Results */
 .results-panel {
-grid-column: 1 / -1; background: var(–surface);
-border: 1px solid var(–accent); border-radius: 8px; padding: 24px;
+width: 100%;
+background-color: var(–surface);
+border: 1px solid var(–accent);
+border-radius: 8px; padding: 24px;
 position: relative; overflow: hidden;
 }
-.results-panel::before { content: ‘’; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(–accent), transparent); }
-.results-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 20px; }
-@media(max-width:600px) { .results-grid { grid-template-columns: 1fr 1fr; } }
-.result-item { background: var(–surface2); border-radius: 6px; padding: 14px; border: 1px solid var(–border); }
-.result-item .rl { font-size: 10px; color: var(–muted); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.results-panel:before {
+content: ‘’;
+position: absolute; top: 0; left: 0; right: 0; height: 2px;
+background: -webkit-linear-gradient(left, var(–accent), transparent);
+background: linear-gradient(to right, var(–accent), transparent);
+}
+.results-grid {
+display: -webkit-flex; display: flex;
+-webkit-flex-wrap: wrap; flex-wrap: wrap;
+gap: 14px; margin-bottom: 20px;
+}
+.result-item {
+background-color: var(–surface2);
+border-radius: 6px; padding: 14px;
+border: 1px solid var(–border);
+width: calc(33.33% - 10px); min-width: 120px;
+-webkit-flex: 1; flex: 1;
+}
+@media(max-width: 500px) { .result-item { width: calc(50% - 7px); } }
+.result-item .rl { font-size: 10px; color: var(–muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
 .result-item .rv { font-family: ‘DM Serif Display’, Georgia, serif; font-size: 22px; color: var(–text); }
-.result-item .rv.pos { color: var(–result-pos) !important; }
-.result-item .rv.neg { color: var(–result-neg) !important; }
-.result-item .rv.warn { color: var(–result-warn) !important; }
+.result-item .rv.pos { color: #3dffa0 !important; color: var(–result-pos) !important; }
+.result-item .rv.neg { color: #ff7070 !important; color: var(–result-neg) !important; }
+.result-item .rv.warn { color: #ffd966 !important; color: var(–result-warn) !important; }
 .result-item .rs { font-size: 10px; color: var(–muted); margin-top: 2px; }
-.effective-rate-bar { height: 7px; background: var(–surface2); border-radius: 4px; overflow: hidden; margin: 10px 0 5px; }
-.effective-rate-bar .fill { height: 100%; border-radius: 4px; transition: width .6s ease; background: linear-gradient(90deg, #3dffa0, #ffd966) !important; }
-.rate-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(–muted); }
-
-/* Breakdown */
-.breakdown { border-top: 1px solid var(–border); padding-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
-@media(max-width:600px) { .breakdown { grid-template-columns: 1fr; } }
-.breakdown-col h3 { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; margin-bottom: 12px; }
+.effective-rate-bar { height: 7px; background-color: var(–surface2); border-radius: 4px; overflow: hidden; margin: 10px 0 5px; }
+.effective-rate-bar .fill {
+height: 100%; border-radius: 4px;
+-webkit-transition: width 0.6s ease; transition: width 0.6s ease;
+background: -webkit-linear-gradient(left, #3dffa0, #ffd966) !important;
+background: linear-gradient(to right, #3dffa0, #ffd966) !important;
+}
+.rate-labels {
+display: -webkit-flex; display: flex;
+-webkit-justify-content: space-between; justify-content: space-between;
+font-size: 10px; color: var(–muted);
+}
+.breakdown {
+border-top: 1px solid var(–border);
+padding-top: 20px; margin-top: 20px;
+display: -webkit-flex; display: flex;
+-webkit-flex-wrap: wrap; flex-wrap: wrap;
+gap: 20px;
+}
+.breakdown-col { -webkit-flex: 1; flex: 1; min-width: 220px; }
+.breakdown-col h3 { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 12px; }
 .breakdown-col.federal h3 { color: var(–federal); }
 .breakdown-col.provincial h3 { color: var(–accent); }
-.breakdown-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dotted var(–border); font-size: 11px; }
+.breakdown-row {
+display: -webkit-flex; display: flex;
+-webkit-justify-content: space-between; justify-content: space-between;
+padding: 5px 0; border-bottom: 1px dotted var(–border); font-size: 11px;
+}
 .breakdown-row .row-label { color: var(–muted); }
 .breakdown-row .row-val { color: var(–text); }
-.breakdown-row .row-val.red { color: var(–result-neg) !important; }
-.breakdown-row .row-val.green { color: var(–result-pos) !important; }
-.breakdown-row .row-val.yellow { color: var(–result-warn) !important; }
+.breakdown-row .row-val.red { color: #ff7070 !important; color: var(–result-neg) !important; }
+.breakdown-row .row-val.green { color: #3dffa0 !important; color: var(–result-pos) !important; }
+.breakdown-row .row-val.yellow { color: #ffd966 !important; color: var(–result-warn) !important; }
 .breakdown-row.total-row { border-bottom: none; margin-top: 4px; font-weight: 500; }
 .breakdown-row.total-row .row-label { color: var(–text); }
 
-/* Bracket table — always visible */
+/* Tip box */
+.tip-box {
+width: 100%;
+background-color: var(–accent-dim);
+border: 1px solid var(–accent-border);
+border-radius: 6px; padding: 14px 16px;
+font-size: 11px; color: var(–muted); line-height: 1.8; display: none;
+}
+.tip-box strong { color: var(–accent); }
+.qc-only { display: none; }
+
+/* ═══════════════════════════════════════
+BASIC MODE
+═══════════════════════════════════════ */
+.basic-mode { display: block; }
+.basic-mode.hidden { display: none; }
+.advanced-mode { display: none; }
+.advanced-mode.visible { display: block; }
+.basic-card {
+background-color: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px; padding: 24px;
+width: 100%;
+}
+.basic-section-title {
+font-size: 9px; text-transform: uppercase;
+letter-spacing: 0.18em; color: var(–muted);
+margin: 20px 0 12px; padding-top: 16px;
+border-top: 1px solid var(–border);
+}
+.basic-section-title:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
+.basic-grid {
+display: -webkit-flex; display: flex;
+-webkit-flex-wrap: wrap; flex-wrap: wrap;
+gap: 14px;
+}
+.basic-grid .field { width: calc(50% - 7px); min-width: 200px; -webkit-flex: 1; flex: 1; }
+@media(max-width: 580px) { .basic-grid .field { width: 100%; } }
+.basic-desc {
+font-size: 11px; color: var(–muted);
+margin-bottom: 20px; line-height: 1.7;
+padding: 10px 14px;
+background-color: var(–accent-dim);
+border-left: 2px solid var(–accent-border);
+border-radius: 0 6px 6px 0;
+}
+.basic-desc strong { color: var(–accent); }
+
+/* ═══════════════════════════════════════
+BRACKET TABLE
+═══════════════════════════════════════ */
 .bracket-section-wrap { margin: 24px 0; }
-.bracket-card { background: var(–surface); border: 1px solid var(–border); border-radius: 8px; padding: 20px; }
-.bracket-card-title { font-size: 10px; text-transform: uppercase; letter-spacing: .15em; color: var(–muted); margin-bottom: 16px; }
-.bracket-note { background: var(–accent-dim); border: 1px solid var(–accent-border); border-radius: 6px; padding: 10px 14px; font-size: 11px; color: var(–muted); margin-bottom: 18px; line-height: 1.7; }
+.bracket-card {
+background-color: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px; padding: 20px;
+}
+.bracket-card-title { font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: var(–muted); margin-bottom: 16px; }
+.bracket-note {
+background-color: var(–accent-dim);
+border: 1px solid var(–accent-border);
+border-radius: 6px; padding: 10px 14px;
+font-size: 11px; color: var(–muted);
+margin-bottom: 18px; line-height: 1.7;
+}
 .bracket-note strong { color: var(–accent); }
-.bracket-tables { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-@media(max-width:600px) { .bracket-tables { grid-template-columns: 1fr; } }
-.bracket-section { background: var(–surface2); border-radius: 8px; padding: 14px; border: 1px solid var(–border); }
-.bracket-header { font-size: 11px; font-weight: 600; letter-spacing: .05em; margin-bottom: 2px; }
+.bracket-tables {
+display: -webkit-flex; display: flex;
+-webkit-flex-wrap: wrap; flex-wrap: wrap;
+gap: 16px; margin-bottom: 16px;
+}
+.bracket-section {
+background-color: var(–surface2);
+border-radius: 8px; padding: 14px;
+border: 1px solid var(–border);
+-webkit-flex: 1; flex: 1; min-width: 220px;
+}
+.bracket-header { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 2px; }
 .fed-header { color: var(–federal); }
 .prov-header { color: var(–accent); }
 .bracket-sub { font-size: 10px; color: var(–muted); margin-bottom: 10px; }
 .bracket-table { width: 100%; border-collapse: collapse; font-size: 11px; }
 .bracket-table thead tr { border-bottom: 1px solid var(–border); }
-.bracket-table th { color: var(–muted); font-weight: 500; text-align: left; padding: 4px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
-.bracket-table td { padding: 5px 6px; color: var(–text); border-bottom: 1px solid rgba(128,128,128,.07); }
+.bracket-table th {
+color: var(–muted); font-weight: 500; text-align: left;
+padding: 4px 6px; font-size: 10px;
+text-transform: uppercase; letter-spacing: 0.08em;
+}
+.bracket-table td { padding: 5px 6px; color: var(–text); border-bottom: 1px solid rgba(128,128,128,0.07); }
 .bracket-table tr:last-child td { border-bottom: none; }
 .qc-rate { color: var(–accent3) !important; font-weight: 500; }
-.bracket-footnote { font-size: 10px; color: var(–muted); margin-top: 8px; line-height: 1.5; opacity: .75; }
-.combined-row { background: var(–surface2); border: 1px solid var(–border); border-radius: 8px; padding: 12px 16px; margin-top: 4px; }
-.combined-label { font-size: 10px; color: var(–muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; }
-.combined-rates { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
-.combined-chip { background: var(–federal-dim); border: 1px solid var(–federal-border); border-radius: 5px; padding: 4px 10px; font-size: 11px; color: var(–muted); }
+.bracket-footnote { font-size: 10px; color: var(–muted); margin-top: 8px; line-height: 1.5; opacity: 0.75; }
+.combined-row {
+background-color: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 8px; padding: 12px 16px; margin-top: 4px;
+}
+.combined-label { font-size: 10px; color: var(–muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.combined-rates {
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center;
+-webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 8px;
+}
+.combined-chip {
+background-color: var(–federal-dim);
+border: 1px solid var(–federal-border);
+border-radius: 5px; padding: 4px 10px;
+font-size: 11px; color: var(–muted);
+}
 .combined-chip strong { color: var(–federal); }
-.combined-chip.prov { background: var(–accent-dim); border-color: var(–accent-border); }
+.combined-chip.prov { background-color: var(–accent-dim); border-color: var(–accent-border); }
 .combined-chip.prov strong { color: var(–accent); }
-.combined-chip.total { background: rgba(255,217,102,.08); border-color: rgba(255,217,102,.22); }
+.combined-chip.total { background-color: rgba(255,217,102,0.08); border-color: rgba(255,217,102,0.22); }
 .combined-chip.total strong { color: var(–accent3); font-size: 13px; }
 .combined-plus { color: var(–muted); font-size: 14px; }
 
-/* Basic mode */
-.basic-mode { display: block; }
-.basic-mode.hidden { display: none; }
-.advanced-mode { display: none; }
-.advanced-mode.visible { display: contents; }
-.basic-card { grid-column: 1 / -1; background: var(–surface); border: 1px solid var(–border); border-radius: 8px; padding: 24px; }
-.basic-section-title { font-size: 9px; text-transform: uppercase; letter-spacing: .18em; color: var(–muted); margin: 20px 0 12px; padding-top: 16px; border-top: 1px solid var(–border); }
-.basic-section-title:first-of-type { margin-top: 0; padding-top: 0; border-top: none; }
-.basic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media(max-width:580px) { .basic-grid { grid-template-columns: 1fr; } }
-.basic-desc { font-size: 11px; color: var(–muted); margin-bottom: 20px; line-height: 1.7; padding: 10px 14px; background: var(–accent-dim); border-left: 2px solid var(–accent-border); border-radius: 0 6px 6px 0; }
-.basic-desc strong { color: var(–accent); }
-
-/* Tip box */
-.tip-box { grid-column: 1/-1; background: var(–accent-dim); border: 1px solid var(–accent-border); border-radius: 6px; padding: 14px 16px; font-size: 11px; color: var(–muted); line-height: 1.8; display: none; }
-.tip-box strong { color: var(–accent); }
-
-/* Province credits section */
-#provCreditsSection { margin-top: 14px; }
-.qc-only { display: none; }
-
-/* ═══════════════════════════════════════════
-LEGAL DISCLAIMER — always at bottom
-═══════════════════════════════════════════ */
-.page-footer {
-margin-top: 48px; padding-top: 0;
+/* ═══════════════════════════════════════
+ADVISOR
+═══════════════════════════════════════ */
+.advisor-wrap { padding: 4px 0 40px; }
+.advisor-intro {
+display: -webkit-flex; display: flex;
+gap: 16px; -webkit-align-items: flex-start; align-items: flex-start;
+background-color: var(–accent-dim);
+border: 1px solid var(–accent-border);
+border-radius: 10px; padding: 18px 20px; margin-bottom: 28px;
 }
+.advisor-intro-icon { font-size: 26px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.advisor-intro-title { font-family: ‘DM Serif Display’, Georgia, serif; font-size: 15px; color: var(–text); margin-bottom: 5px; }
+.advisor-intro-sub { font-size: 11px; color: var(–muted); line-height: 1.7; }
+.advisor-question {
+display: -webkit-flex; display: flex;
+gap: 16px; margin-bottom: 28px;
+padding-bottom: 28px; border-bottom: 1px solid var(–border);
+}
+.advisor-question:last-of-type { border-bottom: none; }
+.advisor-q-num { font-size: 11px; color: var(–accent); font-weight: 600; letter-spacing: 0.1em; min-width: 22px; margin-top: 2px; -webkit-flex-shrink: 0; flex-shrink: 0; }
+.advisor-q-body { -webkit-flex: 1; flex: 1; }
+.advisor-q-label { font-size: 12px; color: var(–text); margin-bottom: 12px; line-height: 1.5; }
+.advisor-q-chips { display: -webkit-flex; display: flex; -webkit-flex-wrap: wrap; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+.aq-chip {
+background-color: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 20px; color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+font-size: 11px; padding: 6px 14px;
+cursor: pointer;
+-webkit-transition: all 0.15s; transition: all 0.15s;
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+outline: none;
+-webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.aq-chip.sel-single { background-color: var(–accent-dim); border-color: var(–accent); color: var(–accent); }
+.aq-chip.sel-multi { background-color: var(–federal-dim); border-color: var(–federal); color: var(–federal); }
+.aq-chip.other-open { border-color: var(–accent3); color: var(–accent3); background-color: rgba(255,217,102,0.08); }
+.other-expand {
+width: 100%;
+background-color: var(–input-bg);
+border: 1px solid var(–border);
+border-radius: 6px;
+color: var(–text); -webkit-text-fill-color: var(–text);
+font-family: ‘DM Mono’, monospace; font-size: 11px;
+padding: 9px 12px; outline: none;
+margin-top: 8px; line-height: 1.5;
+-webkit-transition: border-color 0.15s; transition: border-color 0.15s;
+display: none; resize: vertical; min-height: 60px;
+}
+.other-expand.visible { display: block; }
+.other-expand::-webkit-input-placeholder { color: var(–muted2); opacity: 1; }
+.advisor-freetext {
+width: 100%;
+background-color: var(–input-bg);
+border: 1px solid var(–border);
+border-radius: 6px;
+color: var(–text); -webkit-text-fill-color: var(–text);
+font-family: ‘DM Mono’, monospace; font-size: 12px;
+padding: 12px 14px; outline: none;
+resize: vertical; min-height: 90px; line-height: 1.6;
+margin-bottom: 6px;
+-webkit-transition: border-color 0.15s; transition: border-color 0.15s;
+}
+.advisor-freetext::-webkit-input-placeholder { color: var(–muted2); opacity: 1; }
+.advisor-generate-btn {
+width: 100%; padding: 16px;
+background-color: var(–accent); color: #0d0f14;
+font-family: ‘DM Mono’, monospace;
+font-size: 13px; font-weight: 600; letter-spacing: 0.1em;
+border: none; border-radius: 8px;
+cursor: pointer; margin-top: 8px;
+-webkit-appearance: none; -moz-appearance: none; appearance: none;
+outline: none; display: block;
+-webkit-tap-highlight-color: transparent; touch-action: manipulation;
+}
+.advisor-report-header {
+background-color: var(–surface);
+border: 1px solid var(–accent);
+border-radius: 10px; padding: 20px 22px;
+margin-top: 28px; margin-bottom: 20px;
+position: relative; overflow: hidden;
+}
+.advisor-report-header:before {
+content: ‘’;
+position: absolute; top: 0; left: 0; right: 0; height: 2px;
+background: -webkit-linear-gradient(left, var(–accent), transparent);
+background: linear-gradient(to right, var(–accent), transparent);
+}
+.advisor-report-title { font-family: ‘DM Serif Display’, Georgia, serif; font-size: 20px; color: var(–text); margin-bottom: 6px; }
+.advisor-report-sub { font-size: 11px; color: var(–muted); line-height: 1.6; }
+.advisor-section-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.18em; color: var(–muted); margin: 24px 0 12px; }
+.advisor-action {
+background-color: var(–surface);
+border: 1px solid var(–border);
+border-radius: 8px; padding: 18px 20px; margin-bottom: 12px;
+display: -webkit-flex; display: flex;
+gap: 16px; -webkit-align-items: flex-start; align-items: flex-start;
+}
+.advisor-action.p-high { border-left: 3px solid var(–accent); }
+.advisor-action.p-med { border-left: 3px solid var(–accent3); }
+.advisor-action.p-low { border-left: 3px solid var(–federal); }
+.action-rank { font-size: 18px; -webkit-flex-shrink: 0; flex-shrink: 0; min-width: 24px; }
+.action-body { -webkit-flex: 1; flex: 1; }
+.action-title { font-size: 12px; color: var(–text); font-weight: 500; margin-bottom: 5px; }
+.action-desc { font-size: 11px; color: var(–muted); line-height: 1.7; margin-bottom: 8px; }
+.action-saving {
+display: -webkit-inline-flex; display: inline-flex;
+-webkit-align-items: center; align-items: center;
+gap: 6px;
+background-color: var(–accent-dim);
+border: 1px solid var(–accent-border);
+border-radius: 5px; padding: 4px 10px;
+font-size: 11px; color: var(–accent); font-weight: 500;
+}
+.action-saving.y { background-color: rgba(255,217,102,0.08); border-color: rgba(255,217,102,0.22); color: var(–accent3); }
+.action-saving.b { background-color: var(–federal-dim); border-color: var(–federal-border); color: var(–federal); }
+.atag {
+display: inline-block; font-size: 9px; text-transform: uppercase;
+letter-spacing: 0.1em; padding: 2px 7px; border-radius: 3px;
+margin-right: 5px; margin-bottom: 6px;
+}
+.atag.h { background-color: var(–accent-dim); color: var(–accent); }
+.atag.m { background-color: rgba(255,217,102,0.12); color: var(–accent3); }
+.atag.l { background-color: var(–federal-dim); color: var(–federal); }
+.atag.x { background-color: rgba(255,112,112,0.12); color: var(–result-neg); }
+.advisor-no-data { background-color: rgba(255,217,102,0.06); border: 1px solid rgba(255,217,102,0.2); border-radius: 8px; padding: 18px 20px; color: var(–muted); font-size: 12px; line-height: 1.8; margin-top: 20px; }
+.advisor-no-data strong { color: var(–accent3); }
+.claude-block { background-color: var(–surface2); border: 1px dashed var(–border); border-radius: 8px; padding: 20px; margin-top: 24px; text-align: center; }
+.claude-block p { font-size: 11px; color: var(–muted2); line-height: 1.7; margin-bottom: 14px; }
+.claude-block-btn {
+background-color: var(–surface); border: 1px solid var(–border);
+border-radius: 6px; color: var(–muted2); opacity: 0.5;
+font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 10px 20px;
+cursor: not-allowed;
+}
+
+/* ═══════════════════════════════════════
+LEGAL DISCLAIMER
+═══════════════════════════════════════ */
+.page-footer { margin-top: 48px; }
 .legal-box {
-background: var(–legal-bg);
+background-color: var(–legal-bg);
 border: 1px solid var(–legal-border);
 border-radius: 10px; padding: 22px 24px;
 }
 .legal-title {
-font-size: 11px; font-weight: 700; letter-spacing: .1em;
-text-transform: uppercase; color: #c07070; margin-bottom: 14px;
-display: flex; align-items: center; gap: 8px;
+font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+text-transform: uppercase; color: #c07070;
+margin-bottom: 14px;
+display: -webkit-flex; display: flex;
+-webkit-align-items: center; align-items: center; gap: 8px;
 }
-body.light .legal-title { color: #963030; }
+body.light-mode .legal-title { color: #963030; }
 .legal-body { font-size: 11px; color: var(–muted); line-height: 1.85; }
 .legal-body p { margin-bottom: 10px; }
-.legal-body p:last-child { margin-bottom: 0; opacity: .65; }
+.legal-body p:last-child { margin-bottom: 0; opacity: 0.65; }
 .legal-body strong { color: #d08080; }
-body.light .legal-body strong { color: #803030; }
-
-/* ═══════════════════════════════════════════
-ADVISOR PANEL
-═══════════════════════════════════════════ */
-.advisor-wrap { padding: 4px 0 40px; }
-.advisor-intro { display: flex; gap: 16px; align-items: flex-start; background: var(–accent-dim); border: 1px solid var(–accent-border); border-radius: 10px; padding: 18px 20px; margin-bottom: 28px; }
-.advisor-intro-icon { font-size: 26px; flex-shrink: 0; }
-.advisor-intro-title { font-family: ‘DM Serif Display’, Georgia, serif; font-size: 15px; color: var(–text); margin-bottom: 5px; }
-.advisor-intro-sub { font-size: 11px; color: var(–muted); line-height: 1.7; }
-.advisor-question { display: flex; gap: 16px; margin-bottom: 28px; padding-bottom: 28px; border-bottom: 1px solid var(–border); }
-.advisor-question:last-of-type { border-bottom: none; }
-.advisor-q-num { font-size: 11px; color: var(–accent); font-weight: 600; letter-spacing: .1em; min-width: 22px; margin-top: 2px; flex-shrink: 0; }
-.advisor-q-body { flex: 1; }
-.advisor-q-label { font-size: 12px; color: var(–text); margin-bottom: 12px; line-height: 1.5; }
-.advisor-q-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-.aq-chip { background: var(–surface2); border: 1px solid var(–border); border-radius: 20px; color: var(–muted); font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 6px 14px; cursor: pointer; transition: all .15s; }
-.aq-chip:hover { border-color: var(–accent); color: var(–accent); }
-.aq-chip.sel-single { background: var(–accent-dim); border-color: var(–accent); color: var(–accent); }
-.aq-chip.sel-multi { background: var(–federal-dim); border-color: var(–federal); color: var(–federal); }
-.aq-chip.other-open { border-color: var(–accent3); color: var(–accent3); background: rgba(255,217,102,.08); }
-.other-expand { width: 100%; background: var(–input-bg); border: 1px solid var(–border); border-radius: 6px; color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 9px 12px; outline: none; margin-top: 8px; line-height: 1.5; transition: border-color .15s; display: none; resize: none; min-height: 60px; }
-.other-expand.visible { display: block; }
-.other-expand:focus { border-color: var(–accent3); }
-.other-expand::placeholder { color: var(–muted2); }
-.advisor-freetext { width: 100%; background: var(–input-bg); border: 1px solid var(–border); border-radius: 6px; color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 12px; padding: 12px 14px; outline: none; resize: vertical; min-height: 90px; line-height: 1.6; margin-bottom: 6px; transition: border-color .15s; }
-.advisor-freetext:focus { border-color: var(–accent); }
-.advisor-freetext::placeholder { color: var(–muted2); }
-.advisor-generate-btn { width: 100%; padding: 16px; background: var(–accent); color: #0d0f14; font-family: ‘DM Mono’, monospace; font-size: 13px; font-weight: 600; letter-spacing: .1em; border: none; border-radius: 8px; cursor: pointer; transition: all .15s; margin-top: 8px; }
-.advisor-generate-btn:hover { opacity: .88; transform: translateY(-1px); }
-.advisor-report-header { background: var(–surface); border: 1px solid var(–accent); border-radius: 10px; padding: 20px 22px; margin-top: 28px; margin-bottom: 20px; position: relative; overflow: hidden; }
-.advisor-report-header::before { content: ‘’; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(–accent), transparent); }
-.advisor-report-title { font-family: ‘DM Serif Display’, Georgia, serif; font-size: 20px; color: var(–text); margin-bottom: 6px; }
-.advisor-report-sub { font-size: 11px; color: var(–muted); line-height: 1.6; }
-.advisor-section-label { font-size: 9px; text-transform: uppercase; letter-spacing: .18em; color: var(–muted); margin: 24px 0 12px; }
-.advisor-action { background: var(–surface); border: 1px solid var(–border); border-radius: 8px; padding: 18px 20px; margin-bottom: 12px; display: flex; gap: 16px; align-items: flex-start; }
-.advisor-action.p-high { border-left: 3px solid var(–accent); }
-.advisor-action.p-med { border-left: 3px solid var(–accent3); }
-.advisor-action.p-low { border-left: 3px solid var(–federal); }
-.action-rank { font-size: 18px; flex-shrink: 0; min-width: 24px; }
-.action-body { flex: 1; }
-.action-title { font-size: 12px; color: var(–text); font-weight: 500; margin-bottom: 5px; }
-.action-desc { font-size: 11px; color: var(–muted); line-height: 1.7; margin-bottom: 8px; }
-.action-saving { display: inline-flex; align-items: center; gap: 6px; background: var(–accent-dim); border: 1px solid var(–accent-border); border-radius: 5px; padding: 4px 10px; font-size: 11px; color: var(–accent); font-weight: 500; }
-.action-saving.y { background: rgba(255,217,102,.08); border-color: rgba(255,217,102,.22); color: var(–accent3); }
-.action-saving.b { background: var(–federal-dim); border-color: var(–federal-border); color: var(–federal); }
-.atag { display: inline-block; font-size: 9px; text-transform: uppercase; letter-spacing: .1em; padding: 2px 7px; border-radius: 3px; margin-right: 5px; margin-bottom: 6px; }
-.atag.h { background: var(–accent-dim); color: var(–accent); }
-.atag.m { background: rgba(255,217,102,.12); color: var(–accent3); }
-.atag.l { background: var(–federal-dim); color: var(–federal); }
-.atag.x { background: rgba(255,112,112,.12); color: var(–result-neg); }
-.advisor-no-data { background: rgba(255,217,102,.06); border: 1px solid rgba(255,217,102,.2); border-radius: 8px; padding: 18px 20px; color: var(–muted); font-size: 12px; line-height: 1.8; margin-top: 20px; }
-.advisor-no-data strong { color: var(–accent3); }
-.claude-block { background: var(–surface2); border: 1px dashed var(–border); border-radius: 8px; padding: 20px; margin-top: 24px; text-align: center; }
-.claude-block p { font-size: 11px; color: var(–muted2); line-height: 1.7; margin-bottom: 14px; }
-.claude-block-btn { background: var(–surface); border: 1px solid var(–border); border-radius: 6px; color: var(–muted2); opacity: .5; font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 10px 20px; cursor: not-allowed; }
+body.light-mode .legal-body strong { color: #803030; }
 </style>
 
 </head>
 <body>
 
-<!-- Theme toggle -->
-
-<button class="theme-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Toggle theme">
+<button class="theme-btn" id="themeBtn" onclick="window.toggleTheme()">
   <div class="theme-track" id="themeTrack"><div class="theme-thumb"></div></div>
   <span id="themeLabel">Dark</span>
 </button>
 
 <div class="container">
 
-<!-- Province bar -->
-
 <div class="province-bar">
   <label>Province / Territory</label>
   <div class="select-wrap">
-    <select class="province-select" id="provinceSelect" onchange="switchProvince()">
-      <option value="QC">Québec</option>
+    <select class="province-select" id="provinceSelect" onchange="window.switchProvince()">
+      <option value="QC">Qu&#233;bec</option>
       <option value="ON">Ontario</option>
       <option value="BC">British Columbia</option>
       <option value="AB">Alberta</option>
@@ -507,35 +923,27 @@ ADVISOR PANEL
       <option value="NL">Newfoundland &amp; Labrador</option>
     </select>
   </div>
-  <span class="prov-badge" id="provBadge">QC · Dual Return</span>
-  <button class="adv-toggle" id="advancedToggle" onclick="toggleAdvanced()">
-    <span>⚡</span> Advanced <span class="adv-status" id="advStatus">OFF</span>
+  <span class="prov-badge" id="provBadge">QC &middot; Dual Return</span>
+  <button class="adv-toggle" id="advancedToggle" onclick="window.toggleAdvanced()">
+    <span>&#9889;</span> Advanced <span class="adv-status" id="advStatus">OFF</span>
   </button>
 </div>
 
 <header>
   <div class="year-badge">2025 Tax Year</div>
-  <h1>Canadian Tax<br><em id="headerProvName">Québec</em> Calculator</h1>
-  <p id="provSubtitle">T1 federal return + TP-1 Québec return · QPP · QPIP · Solidarity Credit</p>
+  <h1>Canadian Tax<br><em id="headerProvName">Qu&#233;bec</em> Calculator</h1>
+  <p id="provSubtitle">T1 federal return + TP-1 Qu&#233;bec return &middot; QPP &middot; QPIP &middot; Solidarity Credit</p>
 </header>
 
-<!-- Tab nav -->
-
 <div class="tab-nav">
-  <button class="tab-btn active" id="tab-calc" onclick="switchTab('calc')">
-    <span>🧮</span> Calculator
-  </button>
-  <button class="tab-btn" id="tab-advisor" onclick="switchTab('advisor')">
-    <span>💡</span> Tax Advisor
-  </button>
+  <button class="tab-btn active" id="tab-calc" onclick="window.switchTab('calc')">&#x1F9EE; Calculator</button>
+  <button class="tab-btn" id="tab-advisor" onclick="window.switchTab('advisor')">&#x1F4A1; Tax Advisor</button>
 </div>
-
-<!-- Sliding panels -->
 
 <div class="tab-slider-wrap">
 <div class="tab-slider" id="tabSlider">
 
-<!-- ══════ CALCULATOR PANEL ══════ -->
+<!-- CALCULATOR PANEL -->
 
 <div class="tab-panel">
 <div class="grid">
@@ -554,38 +962,38 @@ ADVISOR PANEL
     <div class="field field-wrap">
       <div class="field-header">
         <label>Employment Income ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-emp')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-emp')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-emp">
-        <span class="tooltip-close" onclick="closeTip('bt-emp')">✕</span>
+        <span class="tooltip-close" onclick="window.closeTip('bt-emp')">&#x2715;</span>
         <h4>Employment Income</h4>
         <div class="tp-section">
           <div class="tp-label">Where to find it</div>
           <div class="slip-row">
-            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T4 Box 14</strong> — Total employment income. Add all T4s if multiple jobs.</div></div>
-            <div class="slip-badge"><span class="slip-tag prov">QC</span><div class="slip-detail"><strong>RL-1 Box A</strong> — Revenus d'emploi (Québec residents only)</div></div>
+            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T4 Box 14</strong> &mdash; Total employment income. Add all T4s if multiple jobs.</div></div>
+            <div class="slip-badge"><span class="slip-tag prov">QC</span><div class="slip-detail"><strong>RL-1 Box A</strong> &mdash; Revenus d&apos;emploi (Qu&#233;bec residents only)</div></div>
           </div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Effect on tax</div>
-          <div class="tp-val"><strong>100% taxable.</strong> Your employer withheld income tax, CPP/QPP, and EI each pay period. Box 14 is your gross income before those deductions.</div>
+          <div class="tp-val"><strong>100% taxable.</strong> Your employer withheld income tax, CPP/QPP, and EI each pay period. Box 14 is gross income before those deductions.</div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Math</div>
-          <div class="tp-val">Tax = (Employment income − BPA − deductions) × bracket rates. Federal BPA 2025: <strong>$16,129</strong>. QC BPA: <strong>$17,183</strong>.</div>
+          <div class="tp-val">Tax = (Income &minus; BPA &minus; deductions) &times; bracket rates. Federal BPA 2025: <strong>$16,129</strong>. QC BPA: <strong>$17,183</strong>.</div>
         </div>
       </div>
-      <input type="number" id="b-employment" placeholder="0" min="0" oninput="basicLiveUpdate()">
-      <div class="hint">T4 Box 14 — gross salary before any deductions</div>
+      <input type="number" id="b-employment" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
+      <div class="hint">T4 Box 14 &mdash; gross salary before any deductions</div>
     </div>
 
     <div class="field field-wrap">
       <div class="field-header">
         <label>Self-Employment / Other Income ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-se')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-se')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-se">
-        <span class="tooltip-close" onclick="closeTip('bt-se')">✕</span>
+        <span class="tooltip-close" onclick="window.closeTip('bt-se')">&#x2715;</span>
         <h4>Self-Employment &amp; Other Income</h4>
         <div class="tp-section">
           <div class="tp-label">Includes</div>
@@ -594,66 +1002,65 @@ ADVISOR PANEL
         <div class="tp-section">
           <div class="tp-label">Where to report</div>
           <div class="slip-row">
-            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T2125</strong> — Statement of Business Activities</div></div>
-            <div class="slip-badge"><span class="slip-tag prov">QC</span><div class="slip-detail"><strong>TP-80</strong> — Business Income (Québec equivalent)</div></div>
+            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T2125</strong> &mdash; Statement of Business Activities</div></div>
+            <div class="slip-badge"><span class="slip-tag prov">QC</span><div class="slip-detail"><strong>TP-80</strong> &mdash; Business Income (Qu&#233;bec equivalent)</div></div>
           </div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Effect on tax</div>
-          <div class="tp-val">SE income is taxed + you pay <strong>both halves of CPP/QPP</strong> (~11.9% on net income). Half is deductible, half gives you a credit. Switch to Advanced for full expense breakdown.</div>
+          <div class="tp-val">SE income is taxed + you pay <strong>both halves of CPP/QPP</strong> (~11.9% on net). Half is deductible, half gives a credit. Switch to Advanced for full expense breakdown.</div>
         </div>
       </div>
-      <input type="number" id="b-se" placeholder="0" min="0" oninput="basicLiveUpdate()">
-      <div class="hint">Referee fees, freelance, T4A — enter net after basic expenses</div>
+      <input type="number" id="b-se" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
+      <div class="hint">Referee fees, freelance, T4A &mdash; enter net after basic expenses</div>
     </div>
 
     <div class="field field-wrap">
       <div class="field-header">
         <label>Investment Income ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-inv')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-inv')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-inv">
-        <span class="tooltip-close" onclick="closeTip('bt-inv')">✕</span>
+        <span class="tooltip-close" onclick="window.closeTip('bt-inv')">&#x2715;</span>
         <h4>Investment Income</h4>
         <div class="tp-section">
           <div class="tp-label">Where to find it</div>
           <div class="slip-row">
-            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T5</strong> — Interest (Box 13), Eligible dividends (Box 24), Non-eligible dividends (Box 10)</div></div>
-            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T5008</strong> — Capital gains/losses from sales</div></div>
-            <div class="slip-badge"><span class="slip-tag prov">QC</span><div class="slip-detail"><strong>RL-3</strong> — Investment income (Québec slip)</div></div>
+            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T5</strong> &mdash; Interest (Box 13), Eligible dividends (Box 24), Non-eligible (Box 10)</div></div>
+            <div class="slip-badge"><span class="slip-tag prov">QC</span><div class="slip-detail"><strong>RL-3</strong> &mdash; Investment income Qu&#233;bec slip</div></div>
           </div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Effect on tax</div>
-          <div class="tp-val">Interest = 100% taxable. Eligible dividends get a <strong>gross-up + credit</strong> making effective rate lower. Capital gains: <strong>50% inclusion rate</strong> (for first $250k). <strong>TFSA income is tax-free — do NOT include it here.</strong></div>
+          <div class="tp-val">Interest = 100% taxable. Eligible dividends get a <strong>gross-up + credit</strong>. Capital gains: <strong>50% inclusion rate</strong>. <strong>TFSA income is always tax-free &mdash; exclude it here.</strong></div>
         </div>
       </div>
-      <input type="number" id="b-invest" placeholder="0" min="0" oninput="basicLiveUpdate()">
-      <div class="hint">Interest + dividends + capital gains — exclude TFSA income (always tax-free)</div>
+      <input type="number" id="b-invest" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
+      <div class="hint">Interest + dividends + capital gains &mdash; exclude TFSA (always tax-free)</div>
     </div>
 
     <div class="field field-wrap">
       <div class="field-header">
         <label>Other Taxable Income ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-other')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-other')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-other">
-        <span class="tooltip-close" onclick="closeTip('bt-other')">✕</span>
+        <span class="tooltip-close" onclick="window.closeTip('bt-other')">&#x2715;</span>
         <h4>Other Taxable Income</h4>
         <div class="tp-section">
           <div class="tp-label">Includes</div>
-          <div class="tp-val">RRSP withdrawals (T4RSP Box 22), pension income (T4A Box 16), EI benefits (T4E Box 14), CERB, rental income, alimony received, RDSP payments.</div>
+          <div class="tp-val">RRSP withdrawals (T4RSP Box 22), pension income (T4A Box 16), EI benefits (T4E Box 14), CERB, rental income, alimony received.</div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Effect on tax</div>
           <div class="tp-val">Generally <strong>100% taxable</strong> at your marginal rate. Eligible pension income qualifies for the Pension Income Credit (up to $2,000 federal).</div>
         </div>
       </div>
-      <input type="number" id="b-other" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      <input type="number" id="b-other" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
       <div class="hint">RRSP withdrawals, EI benefits, pension income, rental income</div>
     </div>
 
-  </div><!-- /basic-grid income -->
+  </div>
 
   <div class="basic-section-title">Deductions</div>
   <div class="basic-grid">
@@ -661,80 +1068,76 @@ ADVISOR PANEL
     <div class="field field-wrap">
       <div class="field-header">
         <label>RRSP Contributions ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-rrsp')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-rrsp')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-rrsp">
-        <span class="tooltip-close" onclick="closeTip('bt-rrsp')">✕</span>
-        <h4>RRSP — How it saves you tax</h4>
+        <span class="tooltip-close" onclick="window.closeTip('bt-rrsp')">&#x2715;</span>
+        <h4>RRSP &mdash; How it saves you tax</h4>
         <div class="tp-section">
           <div class="tp-label">Where to find it</div>
           <div class="slip-row">
-            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>RRSP contribution receipt</strong> from your bank/broker. Deadline: <strong>March 3, 2026</strong> for 2025 tax year.</div></div>
-            <div class="slip-badge"><span class="slip-tag note">NOTE</span><div class="slip-detail">Check My CRA Account → RRSP/PRPP Deduction Limit for your exact room.</div></div>
+            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>RRSP contribution receipt</strong> from your bank. Deadline: <strong>March 3, 2026</strong>.</div></div>
+            <div class="slip-badge"><span class="slip-tag note">NOTE</span><div class="slip-detail">Check My CRA Account &rarr; RRSP Deduction Limit for your exact room.</div></div>
           </div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Effect on tax</div>
-          <div class="tp-val">Reduces taxable income <strong>dollar for dollar</strong>. If your marginal rate is 36%, $10,000 RRSP contribution = <strong>$3,600 less in combined tax</strong>. Withdrawal is taxed as income (usually at lower retirement rate).</div>
+          <div class="tp-val">Reduces taxable income <strong>dollar for dollar</strong>. At 36% marginal rate, $10,000 RRSP = <strong>$3,600 less combined tax</strong>. Withdrawal taxed as income later (usually lower rate).</div>
         </div>
         <div class="tp-section">
           <div class="tp-label">2025 limit</div>
-          <div class="tp-val">Max <strong>$32,490</strong> (18% of 2024 earned income). Plus unused room from prior years.</div>
+          <div class="tp-val">Max <strong>$32,490</strong> (18% of 2024 earned income) plus unused room from prior years.</div>
         </div>
       </div>
-      <input type="number" id="b-rrsp" placeholder="0" min="0" oninput="basicLiveUpdate()">
-      <div class="hint">Max $32,490 · Check My CRA Account for your exact room · Deadline Mar 3, 2026</div>
+      <input type="number" id="b-rrsp" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
+      <div class="hint">Max $32,490 &middot; Deadline Mar 3, 2026</div>
     </div>
 
     <div class="field field-wrap">
       <div class="field-header">
         <label>FHSA Contributions ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-fhsa')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-fhsa')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-fhsa">
-        <span class="tooltip-close" onclick="closeTip('bt-fhsa')">✕</span>
-        <h4>FHSA — First Home Savings Account</h4>
+        <span class="tooltip-close" onclick="window.closeTip('bt-fhsa')">&#x2715;</span>
+        <h4>FHSA &mdash; First Home Savings Account</h4>
+        <div class="tp-section">
+          <div class="tp-label">Why it&apos;s powerful</div>
+          <div class="tp-val">Deductible like RRSP <strong>AND</strong> tax-free on withdrawal like TFSA for your first home. $8,000/year, lifetime max $40,000. <strong>Best of both worlds.</strong></div>
+        </div>
         <div class="tp-section">
           <div class="tp-label">Where to find it</div>
           <div class="slip-row">
-            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>RC720 slip</strong> from your financial institution. Contributions are on T1 Schedule 15.</div></div>
+            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>RC720 slip</strong> from your financial institution. On T1 Schedule 15.</div></div>
           </div>
         </div>
-        <div class="tp-section">
-          <div class="tp-label">Why it's powerful</div>
-          <div class="tp-val">Deductible like RRSP <strong>AND</strong> tax-free withdrawal like TFSA for your first home. $8,000/year room, lifetime max $40,000. Best of both worlds. <strong>Opens at any major bank — takes 10 minutes.</strong></div>
-        </div>
-        <div class="tp-section">
-          <div class="tp-label">Who qualifies</div>
-          <div class="tp-val">First-time buyer = you have not owned a home in the current year or any of the preceding 4 years. Must be 18+, Canadian resident.</div>
-        </div>
       </div>
-      <input type="number" id="b-fhsa" placeholder="0" min="0" oninput="basicLiveUpdate()">
-      <div class="hint">Max $8,000/yr · Deductible now + tax-free for first home</div>
+      <input type="number" id="b-fhsa" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
+      <div class="hint">Max $8,000/yr &middot; Deductible now + tax-free for first home</div>
     </div>
 
     <div class="field field-wrap">
       <div class="field-header">
         <label>Other Deductions ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-ded')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-ded')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-ded">
-        <span class="tooltip-close" onclick="closeTip('bt-ded')">✕</span>
+        <span class="tooltip-close" onclick="window.closeTip('bt-ded')">&#x2715;</span>
         <h4>Other Deductions</h4>
         <div class="tp-section">
           <div class="tp-label">Includes</div>
-          <div class="tp-val">Union/professional dues (T4 Box 44), childcare expenses (Form T778), moving expenses (T1-M), student loan interest, employment expenses (T2200 required), carrying charges on investments.</div>
+          <div class="tp-val">Union/professional dues (T4 Box 44), childcare (T778), moving (T1-M), student loan interest, employment expenses (T2200 required), carrying charges on investments.</div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Effect on tax</div>
-          <div class="tp-val">All reduce taxable income <strong>dollar-for-dollar</strong>. Each $1,000 in deductions saves you your marginal rate × $1,000. Switch to Advanced for individual fields with exact slip references.</div>
+          <div class="tp-val">All reduce taxable income <strong>dollar-for-dollar</strong>. Each $1,000 saves you marginal rate &times; $1,000. Switch to Advanced for individual fields.</div>
         </div>
       </div>
-      <input type="number" id="b-otherded" placeholder="0" min="0" oninput="basicLiveUpdate()">
+      <input type="number" id="b-otherded" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
       <div class="hint">Union dues, childcare, moving, professional fees, student loan interest</div>
     </div>
 
-  </div><!-- /basic-grid deductions -->
+  </div>
 
   <div class="basic-section-title">Tax Already Withheld</div>
   <div class="basic-grid">
@@ -742,179 +1145,178 @@ ADVISOR PANEL
     <div class="field field-wrap">
       <div class="field-header">
         <label>Federal Tax Withheld ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-fedw')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-fedw')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-fedw">
-        <span class="tooltip-close" onclick="closeTip('bt-fedw')">✕</span>
+        <span class="tooltip-close" onclick="window.closeTip('bt-fedw')">&#x2715;</span>
         <h4>Federal Tax Withheld</h4>
         <div class="tp-section">
           <div class="tp-label">Where to find it</div>
           <div class="slip-row">
-            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T4 Box 22</strong> — Income tax deducted. Add all T4s if multiple jobs.</div></div>
+            <div class="slip-badge"><span class="slip-tag fed">FED</span><div class="slip-detail"><strong>T4 Box 22</strong> &mdash; Income tax deducted. Add all T4s if multiple jobs.</div></div>
           </div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Math</div>
-          <div class="tp-val"><strong>Federal balance = federal tax owing − this amount.</strong> Negative result = CRA refunds you. If you had extra income (SE, investments), you may owe more than was withheld.</div>
+          <div class="tp-val"><strong>Federal balance = federal tax owing &minus; this amount.</strong> Negative = CRA refunds you. Extra income (SE, investments) may mean you owe more.</div>
         </div>
       </div>
-      <input type="number" id="b-fedwith" placeholder="0" min="0" oninput="basicLiveUpdate()">
-      <div class="hint">T4 Box 22 — income tax your employer remitted to CRA</div>
+      <input type="number" id="b-fedwith" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
+      <div class="hint">T4 Box 22 &mdash; income tax remitted to CRA by employer</div>
     </div>
 
     <div class="field field-wrap">
       <div class="field-header">
         <label id="b-provwith-label">Provincial Tax Withheld ($)</label>
-        <span class="tooltip-btn" onclick="toggleTip('bt-provw')">?</span>
+        <button class="tooltip-btn" onclick="window.toggleTip('bt-provw')">?</button>
       </div>
       <div class="tooltip-popup" id="bt-provw">
-        <span class="tooltip-close" onclick="closeTip('bt-provw')">✕</span>
+        <span class="tooltip-close" onclick="window.closeTip('bt-provw')">&#x2715;</span>
         <h4>Provincial Tax Withheld</h4>
         <div class="tp-section">
           <div class="tp-label" id="bt-provw-slip">Where to find it (QC)</div>
           <div class="slip-row">
-            <div class="slip-badge"><span class="slip-tag prov">PROV</span><div class="slip-detail" id="bt-provw-desc"><strong>RL-1 Box E</strong> — Impôt du Québec retenu. This is separate from federal tax withheld.</div></div>
+            <div class="slip-badge"><span class="slip-tag prov">PROV</span><div class="slip-detail" id="bt-provw-desc"><strong>RL-1 Box E</strong> &mdash; Imp&ocirc;t du Qu&eacute;bec retenu. Separate from federal.</div></div>
           </div>
         </div>
         <div class="tp-section">
           <div class="tp-label">Math</div>
-          <div class="tp-val"><strong>Provincial balance = provincial tax owing − this amount.</strong> For QC residents this is a separate return filed with Revenu Québec.</div>
+          <div class="tp-val"><strong>Provincial balance = provincial tax owing &minus; this amount.</strong> For QC residents this is filed separately with Revenu Qu&#233;bec.</div>
         </div>
       </div>
-      <input type="number" id="b-provwith" placeholder="0" min="0" oninput="basicLiveUpdate()">
-      <div class="hint" id="b-provwith-hint">RL-1 Box E — Québec income tax withheld</div>
+      <input type="number" id="b-provwith" placeholder="0" min="0" oninput="window.basicLiveUpdate()">
+      <div class="hint" id="b-provwith-hint">RL-1 Box E &mdash; Qu&#233;bec income tax withheld</div>
     </div>
 
-  </div><!-- /basic-grid withheld -->
+  </div>
 
-  <!-- Basic results area -->
   <div id="basicResults" style="display:none; margin-top:24px;">
     <div style="border-top:1px solid var(--border); padding-top:20px;">
-      <div class="card-title" style="margin-bottom:16px;">Quick Estimate — 2025</div>
+      <div class="card-title" style="margin-bottom:16px;">Quick Estimate &mdash; 2025</div>
       <div class="results-grid" id="basicSummaryCards"></div>
       <div class="effective-rate-bar" style="margin-top:12px;"><div class="fill" id="basicRateBar" style="width:0%"></div></div>
-      <div class="rate-labels"><span>0%</span><span id="basicRateLabel">Effective rate: —</span><span>55%</span></div>
-      <div style="margin-top:14px; font-size:10px; color:var(--muted); text-align:center;">Switch to <strong style="color:var(--accent3)">Advanced</strong> above for the full federal + provincial breakdown with detailed line items.</div>
+      <div class="rate-labels"><span>0%</span><span id="basicRateLabel">Effective rate: &mdash;</span><span>55%</span></div>
+      <div style="margin-top:14px;font-size:10px;color:var(--muted);text-align:center;">Switch to <strong style="color:var(--accent3)">Advanced</strong> for the full federal + provincial breakdown.</div>
     </div>
   </div>
 
-  <button class="calc-btn" style="margin-top:20px;" onclick="basicCalculate()">↳ ESTIMATE MY 2025 TAXES</button>
+  <button class="calc-btn" style="margin-top:20px;" onclick="window.basicCalculate()">&#x21B3; ESTIMATE MY 2025 TAXES</button>
 </div>
 ```
 
-  </div><!-- /basicMode -->
+  </div>
 
   <!-- ADVANCED MODE -->
 
-  <div class="advanced-mode" id="advancedMode">
+  <div class="advanced-mode full-width" id="advancedMode">
 
 ```
-<div class="marginal-bar full-width" id="marginalBar">
-  <span class="marginal-label">Your next dollar →</span>
+<div class="marginal-bar" id="marginalBar">
+  <span class="marginal-label">Your next dollar &rarr;</span>
   <div class="marginal-chips">
-    <span class="mchip fed" id="mchip-fed">Fed —</span>
-    <span class="mchip prov" id="mchip-prov">Prov —</span>
-    <span class="mchip combined" id="mchip-combined">Combined —</span>
+    <span class="mchip fed" id="mchip-fed">Fed &mdash;</span>
+    <span class="mchip prov" id="mchip-prov">Prov &mdash;</span>
+    <span class="mchip combined" id="mchip-combined">Combined &mdash;</span>
   </div>
 </div>
 
-<!-- Employment card -->
+<!-- Employment -->
 <div class="card">
   <div class="card-title">Employment Income</div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Employment Income ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-employment')">?</span></div>
+    <div class="field-header"><label>Employment Income ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-employment')">?</button></div>
     <div class="tooltip-popup" id="tip-employment"></div>
-    <input type="number" id="employment" placeholder="0" min="0" oninput="updatePensionDisplay();updateMarginalRate()">
+    <input type="number" id="employment" placeholder="0" min="0" oninput="window.updatePensionDisplay();window.updateMarginalRate()">
   </div>
   <div class="income-sub-section">
-    <div class="income-sub-title" id="payrollSubTitle">⚙ Payroll Deductions</div>
+    <div class="income-sub-title" id="payrollSubTitle">&#9881; Payroll Deductions</div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Federal Income Tax Withheld ($) — T4 Box 22</label><span class="tooltip-btn" onclick="toggleTip('tip-fedwithheld')">?</span></div>
+      <div class="field-header"><label>Federal Income Tax Withheld ($) &mdash; T4 Box 22</label><button class="tooltip-btn" onclick="window.toggleTip('tip-fedwithheld')">?</button></div>
       <div class="tooltip-popup" id="tip-fedwithheld"></div>
       <input type="number" id="federalWithheld" placeholder="0" min="0">
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label id="labelProvWith">Provincial Tax Withheld ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-provwithheld')">?</span></div>
+      <div class="field-header"><label id="labelProvWith">Provincial Tax Withheld ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-provwithheld')">?</button></div>
       <div class="tooltip-popup" id="tip-provwithheld"></div>
       <input type="number" id="provincialWithheld" placeholder="0" min="0">
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label id="labelPension">Pension Contributions Withheld ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-pension')">?</span></div>
+      <div class="field-header"><label id="labelPension">Pension Contributions Withheld ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-pension')">?</button></div>
       <div class="tooltip-popup" id="tip-pension"></div>
-      <input type="number" id="pensionContrib" placeholder="0" min="0" oninput="updatePensionDisplay()">
+      <input type="number" id="pensionContrib" placeholder="0" min="0" oninput="window.updatePensionDisplay()">
       <div class="hint" id="pensionHint"></div>
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label id="labelEI">EI Premiums Withheld ($) — T4 Box 18</label><span class="tooltip-btn" onclick="toggleTip('tip-ei')">?</span></div>
+      <div class="field-header"><label id="labelEI">EI Premiums Withheld ($) &mdash; T4 Box 18</label><button class="tooltip-btn" onclick="window.toggleTip('tip-ei')">?</button></div>
       <div class="tooltip-popup" id="tip-ei"></div>
       <input type="number" id="ei" placeholder="0" min="0">
       <div class="hint" id="eiHint"></div>
     </div>
     <div class="field field-wrap qc-only" id="qpipField">
-      <div class="field-header"><label>QPIP Premiums ($) — RL-1 Box H</label><span class="tooltip-btn" onclick="toggleTip('tip-qpip')">?</span></div>
+      <div class="field-header"><label>QPIP Premiums ($) &mdash; RL-1 Box H</label><button class="tooltip-btn" onclick="window.toggleTip('tip-qpip')">?</button></div>
       <div class="tooltip-popup" id="tip-qpip"></div>
       <input type="number" id="qpip" placeholder="0" min="0">
-      <div class="hint">RL-1 Box H — Québec parental insurance (QC only)</div>
+      <div class="hint">RL-1 Box H &mdash; Qu&#233;bec parental insurance (QC only)</div>
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label id="labelDues">Union / Professional Dues ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-dues')">?</span></div>
+      <div class="field-header"><label id="labelDues">Union / Professional Dues ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-dues')">?</button></div>
       <div class="tooltip-popup" id="tip-dues"></div>
       <input type="number" id="dues" placeholder="0" min="0">
     </div>
   </div>
   <div class="cpp-detail-block" id="pensionDetailBlock">
-    <div class="cpp-sub-title" id="pensionDetailTitle">📋 Your QPP situation</div>
-    <div class="cpp-row"><span class="cl">Employment income</span><span class="cv" id="cd-employment">—</span></div>
-    <div class="cpp-row"><span class="cl">Year's Basic Exemption</span><span class="cv" id="cd-ybe">−$3,500</span></div>
-    <div class="cpp-row"><span class="cl">Pensionable earnings</span><span class="cv" id="cd-pensionable">—</span></div>
-    <div class="cpp-row"><span class="cl" id="cd-rateLabel">Expected contribution</span><span class="cv" id="cd-expected">—</span></div>
-    <div class="cpp-row"><span class="cl">You entered</span><span class="cv" id="cd-entered">—</span></div>
-    <div class="cpp-row"><span class="cl">Federal credit (15%)</span><span class="cv g" id="cd-fedcredit">—</span></div>
-    <div class="cpp-row"><span class="cl" id="cd-provCreditLabel">QC credit</span><span class="cv g" id="cd-provcredit">—</span></div>
+    <div class="cpp-sub-title" id="pensionDetailTitle">&#x1F4CB; Your QPP situation</div>
+    <div class="cpp-row"><span class="cl">Employment income</span><span class="cv" id="cd-employment">&mdash;</span></div>
+    <div class="cpp-row"><span class="cl">Year&apos;s Basic Exemption</span><span class="cv" id="cd-ybe">&minus;$3,500</span></div>
+    <div class="cpp-row"><span class="cl">Pensionable earnings</span><span class="cv" id="cd-pensionable">&mdash;</span></div>
+    <div class="cpp-row"><span class="cl" id="cd-rateLabel">Expected contribution</span><span class="cv" id="cd-expected">&mdash;</span></div>
+    <div class="cpp-row"><span class="cl">You entered</span><span class="cv" id="cd-entered">&mdash;</span></div>
+    <div class="cpp-row"><span class="cl">Federal credit (15%)</span><span class="cv g" id="cd-fedcredit">&mdash;</span></div>
+    <div class="cpp-row"><span class="cl" id="cd-provCreditLabel">QC credit</span><span class="cv g" id="cd-provcredit">&mdash;</span></div>
   </div>
 </div>
 
-<!-- Self-employment card -->
+<!-- Self-Employment -->
 <div class="card">
   <div class="card-title">Self-Employment (Referee)</div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Gross Revenue ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-serev')">?</span></div>
+    <div class="field-header"><label>Gross Revenue ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-serev')">?</button></div>
     <div class="tooltip-popup" id="tip-serev"></div>
-    <input type="number" id="seRevenue" placeholder="0" min="0" oninput="updateSEQPP();updateMarginalRate()">
+    <input type="number" id="seRevenue" placeholder="0" min="0" oninput="window.updateSEQPP();window.updateMarginalRate()">
   </div>
   <div class="exp-breakdown-box">
     <div class="exp-breakdown-title">Business Expenses</div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Equipment &amp; Gear ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-equip')">?</span></div>
+      <div class="field-header"><label>Equipment &amp; Gear ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-equip')">?</button></div>
       <div class="tooltip-popup" id="tip-equip"></div>
-      <input type="number" id="expEquip" placeholder="0" min="0" oninput="updateSEExpenses()">
+      <input type="number" id="expEquip" placeholder="0" min="0" oninput="window.updateSEExpenses()">
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Registration &amp; Certification Fees ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-regfees')">?</span></div>
+      <div class="field-header"><label>Registration &amp; Certification Fees ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-regfees')">?</button></div>
       <div class="tooltip-popup" id="tip-regfees"></div>
-      <input type="number" id="expFees" placeholder="0" min="0" oninput="updateSEExpenses()">
+      <input type="number" id="expFees" placeholder="0" min="0" oninput="window.updateSEExpenses()">
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Meals During Games ($) — enter full amount</label><span class="tooltip-btn" onclick="toggleTip('tip-meals')">?</span></div>
+      <div class="field-header"><label>Meals During Games ($) &mdash; enter full amount</label><button class="tooltip-btn" onclick="window.toggleTip('tip-meals')">?</button></div>
       <div class="tooltip-popup" id="tip-meals"></div>
-      <input type="number" id="expMeals" placeholder="0" min="0" oninput="updateSEExpenses()">
+      <input type="number" id="expMeals" placeholder="0" min="0" oninput="window.updateSEExpenses()">
       <div class="hint">50% meal rule applied automatically</div>
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Phone &amp; Internet — business % ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-phone')">?</span></div>
+      <div class="field-header"><label>Phone &amp; Internet &mdash; business % ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-phone')">?</button></div>
       <div class="tooltip-popup" id="tip-phone"></div>
-      <input type="number" id="expPhone" placeholder="0" min="0" oninput="updateSEExpenses()">
+      <input type="number" id="expPhone" placeholder="0" min="0" oninput="window.updateSEExpenses()">
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label>CCA / Depreciation ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-cca')">?</span></div>
+      <div class="field-header"><label>CCA / Depreciation ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-cca')">?</button></div>
       <div class="tooltip-popup" id="tip-cca"></div>
-      <input type="number" id="expCCA" placeholder="0" min="0" oninput="updateSEExpenses()">
+      <input type="number" id="expCCA" placeholder="0" min="0" oninput="window.updateSEExpenses()">
       <div class="hint">Enter the CCA amount for this year only, not purchase price</div>
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Other Business Expenses ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-seexp')">?</span></div>
+      <div class="field-header"><label>Other Business Expenses ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-seexp')">?</button></div>
       <div class="tooltip-popup" id="tip-seexp"></div>
-      <input type="number" id="seExpenses" placeholder="0" min="0" oninput="updateSEExpenses()">
+      <input type="number" id="seExpenses" placeholder="0" min="0" oninput="window.updateSEExpenses()">
     </div>
     <div class="exp-total-row">
       <span style="color:var(--muted)">Total deductible expenses</span>
@@ -922,114 +1324,114 @@ ADVISOR PANEL
     </div>
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Vehicle / Mileage ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-vehicle')">?</span></div>
+    <div class="field-header"><label>Vehicle / Mileage ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-vehicle')">?</button></div>
     <div class="tooltip-popup" id="tip-vehicle"></div>
-    <input type="number" id="vehicle" placeholder="0" min="0" oninput="updateSEQPP()">
+    <input type="number" id="vehicle" placeholder="0" min="0" oninput="window.updateSEQPP()">
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Home Office Expenses ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-homeoffice')">?</span></div>
+    <div class="field-header"><label>Home Office Expenses ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-homeoffice')">?</button></div>
     <div class="tooltip-popup" id="tip-homeoffice"></div>
-    <input type="number" id="homeOffice" placeholder="0" min="0" oninput="updateSEQPP()">
+    <input type="number" id="homeOffice" placeholder="0" min="0" oninput="window.updateSEQPP()">
   </div>
   <div class="cpp-detail-block" id="sePensionBlock">
-    <div class="cpp-sub-title" id="sePensionTitle">📋 SE QPP situation</div>
-    <div class="cpp-row"><span class="cl">Net SE income</span><span class="cv" id="se-net">—</span></div>
-    <div class="cpp-row"><span class="cl" id="se-rateLabel">SE pension rate</span><span class="cv" id="se-pension">—</span></div>
-    <div class="cpp-row"><span class="cl" id="se-deductLabel">Deductible half</span><span class="cv g" id="se-deduct">—</span></div>
-    <div class="cpp-row"><span class="cl" id="se-creditLabel">Credit half</span><span class="cv g" id="se-credit">—</span></div>
+    <div class="cpp-sub-title" id="sePensionTitle">&#x1F4CB; SE QPP situation</div>
+    <div class="cpp-row"><span class="cl">Net SE income</span><span class="cv" id="se-net">&mdash;</span></div>
+    <div class="cpp-row"><span class="cl" id="se-rateLabel">SE pension rate</span><span class="cv" id="se-pension">&mdash;</span></div>
+    <div class="cpp-row"><span class="cl" id="se-deductLabel">Deductible half</span><span class="cv g" id="se-deduct">&mdash;</span></div>
+    <div class="cpp-row"><span class="cl" id="se-creditLabel">Credit half</span><span class="cv g" id="se-credit">&mdash;</span></div>
   </div>
-  <div class="chat-toggle" onclick="toggleChat('chat-se')">💬 Describe a complex expense...</div>
+  <div class="chat-toggle" onclick="window.toggleChat('chat-se')">&#x1F4AC; Describe a complex expense...</div>
   <div class="chat-box" id="chat-se">
-    <div class="chat-messages" id="msgs-se"><div class="chat-msg ai">Tell me about an expense you're unsure about.</div></div>
+    <div class="chat-messages" id="msgs-se"><div class="chat-msg ai">Tell me about an expense you&apos;re unsure about.</div></div>
     <div class="chat-input-row">
-      <input type="text" id="input-se" placeholder="e.g. I bought a $300 whistle..." onkeydown="if(event.key==='Enter')sendChat('se')">
-      <button class="chat-send" onclick="sendChat('se')">→</button>
+      <input type="text" id="input-se" placeholder="e.g. I bought a $300 whistle..." onkeydown="if(event.key==='Enter')window.sendChat('se')">
+      <button class="chat-send" onclick="window.sendChat('se')">&rarr;</button>
     </div>
   </div>
 </div>
 
-<!-- Investments card -->
+<!-- Investments -->
 <div class="card">
   <div class="card-title">Investment Income</div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Interest &amp; Foreign Income ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-interest')">?</span></div>
+    <div class="field-header"><label>Interest &amp; Foreign Income ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-interest')">?</button></div>
     <div class="tooltip-popup" id="tip-interest"></div>
     <input type="number" id="interest" placeholder="0" min="0">
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Eligible Dividends — actual amount ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-eligdiv')">?</span></div>
+    <div class="field-header"><label>Eligible Dividends &mdash; actual amount ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-eligdiv')">?</button></div>
     <div class="tooltip-popup" id="tip-eligdiv"></div>
     <input type="number" id="eligDiv" placeholder="0" min="0">
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Non-Eligible Dividends — actual amount ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-noneligdiv')">?</span></div>
+    <div class="field-header"><label>Non-Eligible Dividends &mdash; actual amount ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-noneligdiv')">?</button></div>
     <div class="tooltip-popup" id="tip-noneligdiv"></div>
     <input type="number" id="nonEligDiv" placeholder="0" min="0">
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Capital Gains ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-capgains')">?</span></div>
+    <div class="field-header"><label>Capital Gains ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-capgains')">?</button></div>
     <div class="tooltip-popup" id="tip-capgains"></div>
     <input type="number" id="capGains" placeholder="0" min="0">
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Capital Losses ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-caplosses')">?</span></div>
+    <div class="field-header"><label>Capital Losses ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-caplosses')">?</button></div>
     <div class="tooltip-popup" id="tip-caplosses"></div>
     <input type="number" id="capLosses" placeholder="0" min="0">
   </div>
-  <div class="chat-toggle" onclick="toggleChat('chat-inv')">💬 Describe a complex investment...</div>
+  <div class="chat-toggle" onclick="window.toggleChat('chat-inv')">&#x1F4AC; Describe a complex investment...</div>
   <div class="chat-box" id="chat-inv">
     <div class="chat-messages" id="msgs-inv"><div class="chat-msg ai">Describe your investment situation.</div></div>
     <div class="chat-input-row">
-      <input type="text" id="input-inv" placeholder="e.g. I sold crypto..." onkeydown="if(event.key==='Enter')sendChat('inv')">
-      <button class="chat-send" onclick="sendChat('inv')">→</button>
+      <input type="text" id="input-inv" placeholder="e.g. I sold crypto..." onkeydown="if(event.key==='Enter')window.sendChat('inv')">
+      <button class="chat-send" onclick="window.sendChat('inv')">&rarr;</button>
     </div>
   </div>
 </div>
 
-<!-- Deductions card -->
+<!-- Deductions -->
 <div class="card">
   <div class="card-title">Deductions &amp; Credits</div>
   <div class="field field-wrap">
-    <div class="field-header"><label>RRSP Contributions ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-rrsp')">?</span></div>
+    <div class="field-header"><label>RRSP Contributions ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-rrsp')">?</button></div>
     <div class="tooltip-popup" id="tip-rrsp"></div>
     <input type="number" id="rrsp" placeholder="0" min="0">
-    <div class="hint">Max $32,490 for 2025 · Deadline March 3, 2026</div>
+    <div class="hint">Max $32,490 for 2025 &middot; Deadline March 3, 2026</div>
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>FHSA Contributions ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-fhsa')">?</span></div>
+    <div class="field-header"><label>FHSA Contributions ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-fhsa')">?</button></div>
     <div class="tooltip-popup" id="tip-fhsa"></div>
     <input type="number" id="fhsa" placeholder="0" min="0">
-    <div class="hint">Max $8,000/yr · Deductible + tax-free for first home</div>
+    <div class="hint">Max $8,000/yr &middot; Deductible + tax-free for first home</div>
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Childcare Expenses ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-childcare')">?</span></div>
+    <div class="field-header"><label>Childcare Expenses ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-childcare')">?</button></div>
     <div class="tooltip-popup" id="tip-childcare"></div>
     <input type="number" id="childcare" placeholder="0" min="0">
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Moving Expenses ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-moving')">?</span></div>
+    <div class="field-header"><label>Moving Expenses ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-moving')">?</button></div>
     <div class="tooltip-popup" id="tip-moving"></div>
     <input type="number" id="moving" placeholder="0" min="0">
   </div>
   <div class="field field-wrap">
-    <div class="field-header"><label>Student Loan Interest ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-studentloan')">?</span></div>
+    <div class="field-header"><label>Student Loan Interest ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-studentloan')">?</button></div>
     <div class="tooltip-popup" id="tip-studentloan"></div>
     <input type="number" id="studentLoan" placeholder="0" min="0">
   </div>
   <div class="income-sub-section" style="margin-top:14px;">
     <div class="income-sub-title">Non-Refundable Credits</div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Medical Expenses ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-medical')">?</span></div>
+      <div class="field-header"><label>Medical Expenses ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-medical')">?</button></div>
       <div class="tooltip-popup" id="tip-medical"></div>
       <input type="number" id="medical" placeholder="0" min="0">
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Charitable Donations ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-donations')">?</span></div>
+      <div class="field-header"><label>Charitable Donations ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-donations')">?</button></div>
       <div class="tooltip-popup" id="tip-donations"></div>
       <input type="number" id="donations" placeholder="0" min="0">
     </div>
     <div class="field field-wrap">
-      <div class="field-header"><label>Tuition Fees ($)</label><span class="tooltip-btn" onclick="toggleTip('tip-tuition')">?</span></div>
+      <div class="field-header"><label>Tuition Fees ($)</label><button class="tooltip-btn" onclick="window.toggleTip('tip-tuition')">?</button></div>
       <div class="tooltip-popup" id="tip-tuition"></div>
       <input type="number" id="tuition" placeholder="0" min="0">
     </div>
@@ -1038,124 +1440,121 @@ ADVISOR PANEL
     <div class="income-sub-title" id="provCreditsTitle">Province-Specific Credits</div>
     <div id="provCreditsFields"></div>
   </div>
-  <div class="chat-toggle" onclick="toggleChat('chat-ded')">💬 Describe other deductions...</div>
+  <div class="chat-toggle" onclick="window.toggleChat('chat-ded')">&#x1F4AC; Describe other deductions...</div>
   <div class="chat-box" id="chat-ded">
     <div class="chat-messages" id="msgs-ded"><div class="chat-msg ai">Describe a deduction situation.</div></div>
     <div class="chat-input-row">
-      <input type="text" id="input-ded" placeholder="e.g. investment loan interest..." onkeydown="if(event.key==='Enter')sendChat('ded')">
-      <button class="chat-send" onclick="sendChat('ded')">→</button>
+      <input type="text" id="input-ded" placeholder="e.g. investment loan interest..." onkeydown="if(event.key==='Enter')window.sendChat('ded')">
+      <button class="chat-send" onclick="window.sendChat('ded')">&rarr;</button>
     </div>
   </div>
 </div>
 
-<!-- Calculate button -->
-<button class="calc-btn" onclick="calculate()">↳ CALCULATE MY 2025 TAXES</button>
+<button class="calc-btn full-width" onclick="window.calculate()">&#x21B3; CALCULATE MY 2025 TAXES</button>
 
-<!-- Results -->
 <div class="results-panel full-width" id="results" style="display:none;">
-  <div class="card-title" style="margin-bottom:20px;">Results — Estimated 2025 Tax</div>
+  <div class="card-title" style="margin-bottom:20px;">Results &mdash; Estimated 2025 Tax</div>
   <div class="results-grid" id="summaryCards"></div>
   <div class="effective-rate-bar"><div class="fill" id="rateBar" style="width:0%"></div></div>
-  <div class="rate-labels"><span>0%</span><span id="effectiveRateLabel">Combined effective rate: —</span><span>55%</span></div>
+  <div class="rate-labels"><span>0%</span><span id="effectiveRateLabel">Combined effective rate: &mdash;</span><span>55%</span></div>
   <div class="breakdown" id="breakdownSection"></div>
 </div>
 
 <div class="tip-box full-width" id="tipBox"></div>
 ```
 
-  </div><!-- /advancedMode -->
+  </div>
 
-</div><!-- /grid -->
-</div><!-- /panel calc -->
+</div>
+</div>
 
-<!-- ══════ ADVISOR PANEL ══════ -->
+<!-- ADVISOR PANEL -->
 
 <div class="tab-panel">
 <div class="advisor-wrap">
   <div class="advisor-intro">
-    <div class="advisor-intro-icon">💡</div>
+    <div class="advisor-intro-icon">&#x1F4A1;</div>
     <div>
       <div class="advisor-intro-title">Personal Tax Advisor</div>
-      <p class="advisor-intro-sub">Answer the questions below and we'll generate a ranked action plan with exact dollar savings — pulled directly from your numbers in the Calculator tab.</p>
+      <p class="advisor-intro-sub">Answer the questions below and we&apos;ll generate a ranked action plan with exact dollar savings &mdash; pulled from your Calculator numbers.</p>
     </div>
   </div>
 
   <div class="advisor-question">
     <div class="advisor-q-num">01</div>
     <div class="advisor-q-body">
-      <div class="advisor-q-label">What's your employment situation?</div>
+      <div class="advisor-q-label">What&apos;s your employment situation?</div>
       <div class="advisor-q-chips" id="aq-emp">
-        <button class="aq-chip" onclick="selSingle('aq-emp',this,'employee')">Employee only</button>
-        <button class="aq-chip" onclick="selSingle('aq-emp',this,'se')">Self-employed only</button>
-        <button class="aq-chip" onclick="selSingle('aq-emp',this,'both')">Both</button>
-        <button class="aq-chip" onclick="selSingle('aq-emp',this,'student')">Student</button>
-        <button class="aq-chip" onclick="openOther('aq-emp-other',this)">Other...</button>
+        <button class="aq-chip" onclick="window.selSingle('aq-emp',this,'employee')">Employee only</button>
+        <button class="aq-chip" onclick="window.selSingle('aq-emp',this,'se')">Self-employed only</button>
+        <button class="aq-chip" onclick="window.selSingle('aq-emp',this,'both')">Both</button>
+        <button class="aq-chip" onclick="window.selSingle('aq-emp',this,'student')">Student</button>
+        <button class="aq-chip" onclick="window.openOther('aq-emp-other',this)">Other...</button>
       </div>
-      <textarea class="other-expand" id="aq-emp-other" placeholder="e.g. retired with pension income, on disability, seasonal worker..."></textarea>
-      <div class="hint">e.g. "I have a full-time job and also referee on weekends" → Both</div>
+      <textarea class="other-expand" id="aq-emp-other" placeholder="e.g. retired with pension income, seasonal worker..."></textarea>
     </div>
   </div>
 
   <div class="advisor-question">
     <div class="advisor-q-num">02</div>
     <div class="advisor-q-body">
-      <div class="advisor-q-label">What are your main financial goals? <span style="color:var(--muted);font-size:10px;">(pick all that apply)</span></div>
+      <div class="advisor-q-label">Main financial goals? <span style="color:var(--muted);font-size:10px;">(pick all that apply)</span></div>
       <div class="advisor-q-chips" id="aq-goals">
-        <button class="aq-chip" onclick="selMulti(this,'home')">🏠 Buy a home</button>
-        <button class="aq-chip" onclick="selMulti(this,'invest')">📈 Grow investments</button>
-        <button class="aq-chip" onclick="selMulti(this,'reduce')">💰 Reduce taxes now</button>
-        <button class="aq-chip" onclick="selMulti(this,'retire')">🌅 Retire early</button>
-        <button class="aq-chip" onclick="selMulti(this,'emergency')">🛡 Emergency fund</button>
-        <button class="aq-chip" onclick="openOther('aq-goals-other',this)">Other...</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'home')">&#x1F3E0; Buy a home</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'invest')">&#x1F4C8; Grow investments</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'reduce')">&#x1F4B0; Reduce taxes now</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'retire')">&#x1F305; Retire early</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'emergency')">&#x1F6E1; Emergency fund</button>
+        <button class="aq-chip" onclick="window.openOther('aq-goals-other',this)">Other...</button>
       </div>
-      <textarea class="other-expand" id="aq-goals-other" placeholder="e.g. pay off student debt, support family members, start a business..."></textarea>
+      <textarea class="other-expand" id="aq-goals-other" placeholder="e.g. pay off debt, start a business..."></textarea>
     </div>
   </div>
 
   <div class="advisor-question">
     <div class="advisor-q-num">03</div>
     <div class="advisor-q-body">
-      <div class="advisor-q-label">Which accounts do you currently have open?</div>
+      <div class="advisor-q-label">Which accounts do you have open?</div>
       <div class="advisor-q-chips" id="aq-accts">
-        <button class="aq-chip" onclick="selMulti(this,'tfsa')">TFSA</button>
-        <button class="aq-chip" onclick="selMulti(this,'rrsp')">RRSP</button>
-        <button class="aq-chip" onclick="selMulti(this,'fhsa')">FHSA</button>
-        <button class="aq-chip" onclick="selMulti(this,'margin')">Non-registered</button>
-        <button class="aq-chip" onclick="selMulti(this,'none')">None yet</button>
-        <button class="aq-chip" onclick="openOther('aq-accts-other',this)">Other...</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'tfsa')">TFSA</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'rrsp')">RRSP</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'fhsa')">FHSA</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'margin')">Non-registered</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'none')">None yet</button>
+        <button class="aq-chip" onclick="window.openOther('aq-accts-other',this)">Other...</button>
       </div>
-      <textarea class="other-expand" id="aq-accts-other" placeholder="e.g. RESP for kids, group pension plan, corporate account..."></textarea>
+      <textarea class="other-expand" id="aq-accts-other" placeholder="e.g. RESP for kids, group pension..."></textarea>
     </div>
   </div>
 
   <div class="advisor-question">
     <div class="advisor-q-num">04</div>
     <div class="advisor-q-body">
-      <div class="advisor-q-label">Any expenses this year that might qualify for a deduction or credit?</div>
+      <div class="advisor-q-label">Any deductible expenses this year?</div>
       <div class="advisor-q-chips" id="aq-exp">
-        <button class="aq-chip" onclick="selMulti(this,'rent')">🏠 Rent paid</button>
-        <button class="aq-chip" onclick="selMulti(this,'tuition')">🎓 Tuition</button>
-        <button class="aq-chip" onclick="selMulti(this,'medical')">🏥 Medical</button>
-        <button class="aq-chip" onclick="selMulti(this,'childcare')">👶 Childcare</button>
-        <button class="aq-chip" onclick="selMulti(this,'moving')">📦 Moving</button>
-        <button class="aq-chip" onclick="selMulti(this,'charity')">❤️ Donations</button>
-        <button class="aq-chip" onclick="selMulti(this,'gear')">⚽ Work gear</button>
-        <button class="aq-chip" onclick="selMulti(this,'vehicle')">🚗 Vehicle</button>
-        <button class="aq-chip" onclick="openOther('aq-exp-other',this)">Other...</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'rent')">&#x1F3E0; Rent paid</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'tuition')">&#x1F393; Tuition</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'medical')">&#x1F3E5; Medical</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'childcare')">&#x1F476; Childcare</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'moving')">&#x1F4E6; Moving</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'charity')">&#x2764; Donations</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'gear')">&#x26BD; Work gear</button>
+        <button class="aq-chip" onclick="window.selMulti(this,'vehicle')">&#x1F697; Vehicle</button>
+        <button class="aq-chip" onclick="window.openOther('aq-exp-other',this)">Other...</button>
       </div>
-      <textarea class="other-expand" id="aq-exp-other" placeholder="e.g. professional liability insurance, home office equipment, work software subscriptions..."></textarea>
+      <textarea class="other-expand" id="aq-exp-other" placeholder="e.g. professional insurance, home office..."></textarea>
     </div>
   </div>
 
   <div class="advisor-question">
     <div class="advisor-q-num">05</div>
     <div class="advisor-q-body">
-      <div class="advisor-q-label">Anything else about your situation? <span style="color:var(--muted);font-size:10px;">(optional)</span></div>
-      <textarea class="advisor-freetext" id="advisor-freetext" placeholder="e.g. I'm 26, renting in Montreal, referee soccer on weekends (~60 games/yr), have $12k in a TFSA, and want to buy a place in 2–3 years..."></textarea>
+      <div class="advisor-q-label">Anything else? <span style="color:var(--muted);font-size:10px;">(optional)</span></div>
+      <textarea class="advisor-freetext" id="advisor-freetext" placeholder="e.g. I&apos;m 26, renting in Montreal, referee soccer on weekends, have $12k in a TFSA, want to buy a place in 2&ndash;3 years..."></textarea>
     </div>
   </div>
 
-<button class="advisor-generate-btn" onclick="generateAdvisorReport()">↳ GENERATE MY TAX PLAN</button>
+<button class="advisor-generate-btn" onclick="window.generateAdvisorReport()">↳ GENERATE MY TAX PLAN</button>
 
   <div id="advisorReport" style="display:none;">
     <div class="advisor-report-header">
@@ -1164,41 +1563,37 @@ ADVISOR PANEL
     </div>
     <div id="advisorReportBody"></div>
     <div class="claude-block">
-      <p>🤖 AI-powered deeper analysis — where Claude reviews your full situation — is coming soon.</p>
-      <button class="claude-block-btn" disabled>Ask Claude — Coming Soon</button>
+      <p>AI-powered deeper analysis is coming soon.</p>
+      <button class="claude-block-btn" disabled>Ask Claude &mdash; Coming Soon</button>
     </div>
   </div>
 </div>
-</div><!-- /panel advisor -->
+</div>
 
-</div><!-- /tab-slider -->
-</div><!-- /tab-slider-wrap -->
+</div>
+</div>
 
-<!-- ══════════════════════════════════════════════════
-  BRACKET TABLE — always visible, outside panels
-════════════════════════════════════════════════════ -->
+<!-- BRACKET TABLE — always visible -->
 
 <div class="bracket-section-wrap">
   <div class="bracket-card" id="bracketCard"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-  LEGAL DISCLAIMER — always at bottom
-════════════════════════════════════════════════════ -->
+<!-- LEGAL DISCLAIMER — always at bottom -->
 
 <div class="page-footer">
   <div class="legal-box">
-    <div class="legal-title">⚠️ Important Legal Disclaimer</div>
+    <div class="legal-title">&#x26A0;&#xFE0F; Important Legal Disclaimer</div>
     <div class="legal-body">
       <p>This calculator is provided for <strong>general informational and planning purposes only</strong>. The results are <strong>estimates only</strong> and do not constitute financial, tax, legal, or accounting advice of any kind.</p>
       <p>This tool <strong>cannot and must not</strong> be used to file your taxes, make legal financial decisions, or as a substitute for advice from a qualified professional. All calculations are based on publicly available 2025 rates and may not reflect your specific personal circumstances, applicable credits, deductions, surtaxes, clawbacks, or recent regulatory changes.</p>
-      <p><strong>Always consult a licensed CPA (Chartered Professional Accountant), tax professional, or legal advisor before making any financial decisions.</strong> For Québec residents, consult both a CPA and Revenu Québec resources. Federal guidance is available through the Canada Revenue Agency (CRA) at canada.ca.</p>
+      <p><strong>Always consult a licensed CPA (Chartered Professional Accountant), tax professional, or legal advisor before making any financial decisions.</strong> For Qu&#233;bec residents, consult both a CPA and Revenu Qu&#233;bec resources. Federal guidance is available through the Canada Revenue Agency (CRA) at canada.ca.</p>
       <p>By using this tool, you acknowledge that no professional-client relationship is created, and that the creators assume no liability for errors, omissions, or decisions made based on these estimates.</p>
     </div>
   </div>
 </div>
 
-</div><!-- /container -->
+</div>
 <script>
 
 // ════════════════════════════════════════════════════════
@@ -2365,319 +2760,298 @@ document.getElementById(‘breakdownSection’).innerHTML=` <div class="breakdow
 }
 
 // ════════════════════════════════════════════════════════
-// THEME TOGGLE
+// ALL FUNCTIONS ASSIGNED TO WINDOW — required for iOS Safari onclick
 // ════════════════════════════════════════════════════════
-function toggleTheme() {
-const isLight = document.body.classList.toggle(‘light’);
-document.getElementById(‘themeTrack’).classList.toggle(‘on’, isLight);
-document.getElementById(‘themeLabel’).textContent = isLight ? ‘Light’ : ‘Dark’;
-}
 
-// ════════════════════════════════════════════════════════
-// TAB NAVIGATION
-// ════════════════════════════════════════════════════════
-function switchTab(tab) {
-document.getElementById(‘tab-calc’).classList.toggle(‘active’, tab===‘calc’);
-document.getElementById(‘tab-advisor’).classList.toggle(‘active’, tab===‘advisor’);
-document.getElementById(‘tabSlider’).style.transform = tab===‘advisor’ ? ‘translateX(-50%)’ : ‘translateX(0)’;
-}
+window.toggleTheme = function() {
+var isLight = document.body.classList.toggle(‘light-mode’);
+var track = document.getElementById(‘themeTrack’);
+var label = document.getElementById(‘themeLabel’);
+if (track) { track.className = isLight ? ‘theme-track on’ : ‘theme-track’; }
+if (label) { label.textContent = isLight ? ‘Light’ : ‘Dark’; }
+};
 
-// ════════════════════════════════════════════════════════
-// BASIC / ADVANCED TOGGLE
-// ════════════════════════════════════════════════════════
-let advancedOn = false;
+window.switchTab = function(tab) {
+var calc = document.getElementById(‘tab-calc’);
+var advisor = document.getElementById(‘tab-advisor’);
+var slider = document.getElementById(‘tabSlider’);
+if (calc) calc.className = tab === ‘calc’ ? ‘tab-btn active’ : ‘tab-btn’;
+if (advisor) advisor.className = tab === ‘advisor’ ? ‘tab-btn active’ : ‘tab-btn’;
+if (slider) slider.style.webkitTransform = slider.style.transform = tab === ‘advisor’ ? ‘translateX(-50%)’ : ‘translateX(0)’;
+};
 
-function toggleAdvanced() {
+var advancedOn = false;
+
+window.toggleAdvanced = function() {
 advancedOn = !advancedOn;
-const btn = document.getElementById(‘advancedToggle’);
-const status = document.getElementById(‘advStatus’);
-const basicEl = document.getElementById(‘basicMode’);
-const advEl = document.getElementById(‘advancedMode’);
+var btn = document.getElementById(‘advancedToggle’);
+var status = document.getElementById(‘advStatus’);
+var basicEl = document.getElementById(‘basicMode’);
+var advEl = document.getElementById(‘advancedMode’);
+if (btn) btn.className = advancedOn ? ‘adv-toggle on’ : ‘adv-toggle’;
+if (status) status.textContent = advancedOn ? ‘ON’ : ‘OFF’;
+if (basicEl) basicEl.className = advancedOn ? ‘basic-mode hidden full-width’ : ‘basic-mode full-width’;
+if (advEl) advEl.className = advancedOn ? ‘advanced-mode visible full-width’ : ‘advanced-mode full-width’;
 if (advancedOn) {
-btn.classList.add(‘on’);
-status.textContent = ‘ON’;
-basicEl.classList.add(‘hidden’);
-advEl.classList.add(‘visible’);
 syncBasicToAdvanced();
-updatePensionDisplay();
-updateMarginalRate();
+if (window.updatePensionDisplay) window.updatePensionDisplay();
+if (window.updateMarginalRate) window.updateMarginalRate();
 } else {
-btn.classList.remove(‘on’);
-status.textContent = ‘OFF’;
-basicEl.classList.remove(‘hidden’);
-advEl.classList.remove(‘visible’);
 syncAdvancedToBasic();
 }
-document.getElementById(‘results’).style.display = ‘none’;
-document.getElementById(‘basicResults’).style.display = ‘none’;
-}
+var r = document.getElementById(‘results’);
+var br = document.getElementById(‘basicResults’);
+if (r) r.style.display = ‘none’;
+if (br) br.style.display = ‘none’;
+};
 
 function syncBasicToAdvanced() {
-const map = [[‘b-employment’,‘employment’],[‘b-fedwith’,‘federalWithheld’],
+var pairs = [[‘b-employment’,‘employment’],[‘b-fedwith’,‘federalWithheld’],
 [‘b-provwith’,‘provincialWithheld’],[‘b-rrsp’,‘rrsp’],[‘b-fhsa’,‘fhsa’]];
-map.forEach(([src,dst])=>{
-const sv = document.getElementById(src);
-const dv = document.getElementById(dst);
-if(sv && dv && sv.value && !dv.value) dv.value = sv.value;
+pairs.forEach(function(p) {
+var src = document.getElementById(p[0]);
+var dst = document.getElementById(p[1]);
+if (src && dst && src.value && !dst.value) dst.value = src.value;
 });
 }
 
 function syncAdvancedToBasic() {
-const map = [[‘employment’,‘b-employment’],[‘federalWithheld’,‘b-fedwith’],
+var pairs = [[‘employment’,‘b-employment’],[‘federalWithheld’,‘b-fedwith’],
 [‘provincialWithheld’,‘b-provwith’],[‘rrsp’,‘b-rrsp’],[‘fhsa’,‘b-fhsa’],
 [‘seRevenue’,‘b-se’]];
-map.forEach(([src,dst])=>{
-const sv = document.getElementById(src);
-const dv = document.getElementById(dst);
-if(sv && dv && sv.value && !dv.value) dv.value = sv.value;
+pairs.forEach(function(p) {
+var src = document.getElementById(p[0]);
+var dst = document.getElementById(p[1]);
+if (src && dst && src.value && !dst.value) dst.value = src.value;
 });
 }
 
-// ════════════════════════════════════════════════════════
-// BASIC CALCULATOR
-// ════════════════════════════════════════════════════════
-function basicLiveUpdate() {
-const hasResults = document.getElementById(‘basicResults’).style.display !== ‘none’;
-if(hasResults) basicCalculate();
-}
+window.basicLiveUpdate = function() {
+var br = document.getElementById(‘basicResults’);
+if (br && br.style.display !== ‘none’) window.basicCalculate();
+};
 
-function basicCalculate() {
-const p = getP();
-const emp      = +document.getElementById(‘b-employment’).value||0;
-const se       = +document.getElementById(‘b-se’).value||0;
-const invest   = +document.getElementById(‘b-invest’).value||0;
-const other    = +document.getElementById(‘b-other’).value||0;
-const rrspV    = +document.getElementById(‘b-rrsp’).value||0;
-const fhsaV    = +document.getElementById(‘b-fhsa’).value||0;
-const otherDed = +document.getElementById(‘b-otherded’).value||0;
-const fedWith  = +document.getElementById(‘b-fedwith’).value||0;
-const provWith = +document.getElementById(‘b-provwith’).value||0;
+window.basicCalculate = function() {
+var p = getP();
+var emp      = Number(document.getElementById(‘b-employment’).value) || 0;
+var se       = Number(document.getElementById(‘b-se’).value) || 0;
+var invest   = Number(document.getElementById(‘b-invest’).value) || 0;
+var other    = Number(document.getElementById(‘b-other’).value) || 0;
+var rrspV    = Number(document.getElementById(‘b-rrsp’).value) || 0;
+var fhsaV    = Number(document.getElementById(‘b-fhsa’).value) || 0;
+var otherDed = Number(document.getElementById(‘b-otherded’).value) || 0;
+var fedWith  = Number(document.getElementById(‘b-fedwith’).value) || 0;
+var provWith = Number(document.getElementById(‘b-provwith’).value) || 0;
 
-const totalIncome = emp + se + invest + other;
-if(totalIncome <= 0) { alert(‘Please enter at least one income amount.’); return; }
+var totalIncome = emp + se + invest + other;
+if (totalIncome <= 0) { alert(‘Please enter at least one income amount.’); return; }
 
-const pensionable = Math.max(0, Math.min(emp, p.pensionCeiling) - 3500);
-const pensionEst  = Math.min(pensionable * p.pensionRate, p.pensionMax);
-const eiEst       = Math.min(emp * p.eiRate, p.eiMax);
-const sePensionEst = Math.min(se * p.pensionSERate, p.pensionSEMax);
-const sePensionDeduct = sePensionEst / 2;
+var pensionable   = Math.max(0, Math.min(emp, p.pensionCeiling) - 3500);
+var pensionEst    = Math.min(pensionable * p.pensionRate, p.pensionMax);
+var eiEst         = Math.min(emp * p.eiRate, p.eiMax);
+var sePensionEst  = Math.min(se * p.pensionSERate, p.pensionSEMax);
+var sePensionDeduct = sePensionEst / 2;
+var totalDeductions = rrspV + fhsaV + otherDed + sePensionDeduct;
+var taxableIncome = Math.max(0, totalIncome - totalDeductions);
 
-const totalDeductions = rrspV + fhsaV + otherDed + sePensionDeduct;
-const taxableIncome   = Math.max(0, totalIncome - totalDeductions);
-
-let fedTax = federalTax(Math.max(0, taxableIncome - 16129));
-const fedCredits = pensionEst * 0.15 + (sePensionEst/2) * 0.15 + eiEst * 0.15;
+var fedTax = federalTax(Math.max(0, taxableIncome - 16129));
+var fedCredits = pensionEst * 0.15 + (sePensionEst / 2) * 0.15 + eiEst * 0.15;
 fedTax = Math.max(0, fedTax - fedCredits - fedTax * p.abatement);
 
-let pTax = provTax(Math.max(0, taxableIncome - p.provBPA));
-const provCredits = pensionEst * p.pensionProvCreditRate + (sePensionEst/2) * p.pensionProvCreditRate + eiEst * p.eiProvCreditRate;
+var pTax = provTax(Math.max(0, taxableIncome - p.provBPA));
+var provCredits = pensionEst * p.pensionProvCreditRate + (sePensionEst / 2) * p.pensionProvCreditRate + eiEst * p.eiProvCreditRate;
 pTax = Math.max(0, pTax - provCredits);
 
-const totalTax = fedTax + pTax;
-const fedBal   = fedTax - fedWith;
-const provBal  = pTax - provWith;
-const afterTax = Math.max(0, totalIncome - totalTax - pensionEst - eiEst);
-const effRate  = totalIncome > 0 ? (totalTax / totalIncome) * 100 : 0;
+var totalTax = fedTax + pTax;
+var fedBal   = fedTax - fedWith;
+var provBal  = pTax - provWith;
+var afterTax = Math.max(0, totalIncome - totalTax - pensionEst - eiEst);
+var effRate  = totalIncome > 0 ? (totalTax / totalIncome) * 100 : 0;
 
-const bc = v => v > 0 ? ‘warn’ : v < 0 ? ‘pos’ : ‘’;
-document.getElementById(‘basicResults’).style.display = ‘block’;
-document.getElementById(‘basicSummaryCards’).innerHTML = `<div class="result-item"><div class="rl">Total Income</div><div class="rv">${fmt(totalIncome)}</div><div class="rs">Before deductions</div></div> <div class="result-item"><div class="rl">Taxable Income</div><div class="rv">${fmt(taxableIncome)}</div><div class="rs">After deductions</div></div> <div class="result-item"><div class="rl">Total Tax</div><div class="rv warn">${fmt(totalTax)}</div><div class="rs">Fed + ${p.name}</div></div> <div class="result-item"><div class="rl">Federal Balance</div><div class="rv ${bc(fedBal)}">${fedBal<0?'−':''}${fmt(Math.abs(fedBal))}</div><div class="rs">${fedBal>=0?'You owe CRA':'CRA refunds you'}</div></div> <div class="result-item"><div class="rl">${p.name} Balance</div><div class="rv ${bc(provBal)}">${provBal<0?'−':''}${fmt(Math.abs(provBal))}</div><div class="rs">${provBal>=0?'You owe province':'Province refunds you'}</div></div> <div class="result-item"><div class="rl">After-Tax Income</div><div class="rv pos">${fmt(afterTax)}</div><div class="rs">Est. take-home</div></div>`;
-const pct = Math.min(effRate/55*100,100);
-document.getElementById(‘basicRateBar’).style.width = pct+’%’;
-document.getElementById(‘basicRateLabel’).textContent = `Effective rate: ${effRate.toFixed(1)}%`;
-}
+var bc = function(v) { return v > 0 ? ‘warn’ : v < 0 ? ‘pos’ : ‘’; };
+var br = document.getElementById(‘basicResults’);
+if (br) br.style.display = ‘block’;
+var sc = document.getElementById(‘basicSummaryCards’);
+if (sc) sc.innerHTML =
+‘<div class="result-item"><div class="rl">Total Income</div><div class="rv">’ + fmt(totalIncome) + ‘</div><div class="rs">Before deductions</div></div>’ +
+‘<div class="result-item"><div class="rl">Taxable Income</div><div class="rv">’ + fmt(taxableIncome) + ‘</div><div class="rs">After deductions</div></div>’ +
+‘<div class="result-item"><div class="rl">Total Tax</div><div class="rv warn">’ + fmt(totalTax) + ‘</div><div class="rs">Fed + ’ + p.name + ‘</div></div>’ +
+‘<div class="result-item"><div class="rl">Federal Balance</div><div class="rv ' + bc(fedBal) + '">’ + (fedBal < 0 ? ‘−’ : ‘’) + fmt(Math.abs(fedBal)) + ‘</div><div class="rs">’ + (fedBal >= 0 ? ‘You owe CRA’ : ‘CRA refunds you’) + ‘</div></div>’ +
+‘<div class="result-item"><div class="rl">’ + p.name + ’ Balance</div><div class="rv ' + bc(provBal) + '">’ + (provBal < 0 ? ‘−’ : ‘’) + fmt(Math.abs(provBal)) + ‘</div><div class="rs">’ + (provBal >= 0 ? ‘You owe province’ : ‘Province refunds you’) + ‘</div></div>’ +
+‘<div class="result-item"><div class="rl">After-Tax Income</div><div class="rv pos">’ + fmt(afterTax) + ‘</div><div class="rs">Est. take-home</div></div>’;
 
-function updateBasicProvLabel() {
+var pct = Math.min(effRate / 55 * 100, 100);
+var bar = document.getElementById(‘basicRateBar’);
+if (bar) bar.style.width = pct + ‘%’;
+var lbl = document.getElementById(‘basicRateLabel’);
+if (lbl) lbl.textContent = ’Effective rate: ’ + effRate.toFixed(1) + ‘%’;
+};
+
+window.updateBasicProvLabel = function() {
 try {
-const p = getP();
-const isQC = p.pensionPlan === ‘QPP’;
-const lbl = document.getElementById(‘b-provwith-label’);
-const hint = document.getElementById(‘b-provwith-hint’);
-const slipLbl = document.getElementById(‘bt-provw-slip’);
-const slipDesc = document.getElementById(‘bt-provw-desc’);
-if(lbl) lbl.textContent = isQC ? ‘Québec Tax Withheld ($) — RL-1 Box E’ : `${p.name} Tax Withheld ($) — T4 Box 22`;
-if(hint) hint.textContent = isQC ? ‘RL-1 Box E — Québec income tax withheld’ : `T4 Box 22 — combined with federal on one slip`;
-if(slipLbl) slipLbl.textContent = isQC ? ‘Where to find it (QC)’ : `Where to find it (${p.name})`;
-if(slipDesc) slipDesc.innerHTML = isQC ? ‘<strong>RL-1 Box E</strong> — Impôt du Québec retenu. Separate from federal.’ : `<strong>T4 Box 22</strong> — same slip as federal income tax.`;
+var p = getP();
+var isQC = p.pensionPlan === ‘QPP’;
+var lbl = document.getElementById(‘b-provwith-label’);
+var hint = document.getElementById(‘b-provwith-hint’);
+var slipLbl = document.getElementById(‘bt-provw-slip’);
+var slipDesc = document.getElementById(‘bt-provw-desc’);
+if (lbl) lbl.textContent = isQC ? ‘Qu\u00e9bec Tax Withheld ($) \u2014 RL-1 Box E’ : p.name + ’ Tax Withheld ($) \u2014 T4 Box 22’;
+if (hint) hint.textContent = isQC ? ‘RL-1 Box E \u2014 Qu\u00e9bec income tax withheld’ : ‘T4 Box 22 \u2014 combined with federal on one slip’;
+if (slipLbl) slipLbl.textContent = isQC ? ‘Where to find it (QC)’ : ‘Where to find it (’ + p.name + ‘)’;
+if (slipDesc) slipDesc.innerHTML = isQC ? ‘<strong>RL-1 Box E</strong> \u2014 Imp\u00f4t du Qu\u00e9bec retenu. Separate from federal.’ : ‘<strong>T4 Box 22</strong> \u2014 same slip as federal income tax.’;
 } catch(e) {}
+};
+
+// Advisor state
+var selEmployment = null;
+var selGoals = {};
+var selAccts = {};
+var selExp = {};
+
+window.selSingle = function(groupId, btn, value) {
+var chips = document.querySelectorAll(’#’ + groupId + ’ .aq-chip’);
+for (var i = 0; i < chips.length; i++) {
+chips[i].className = ‘aq-chip’;
 }
-
-// ════════════════════════════════════════════════════════
-// ADVISOR CHIP LOGIC
-// ════════════════════════════════════════════════════════
-let selEmployment = null;
-const selGoals = new Set();
-const selAccts = new Set();
-const selExp   = new Set();
-
-function selSingle(groupId, btn, value) {
-document.querySelectorAll(’#’+groupId+’ .aq-chip’).forEach(b => b.classList.remove(‘sel-single’,‘other-open’));
-btn.classList.add(‘sel-single’);
+btn.className = ‘aq-chip sel-single’;
 selEmployment = value;
+};
+
+window.selMulti = function(btn, value) {
+var chips = btn.closest(’.advisor-q-chips’);
+var groupId = chips ? chips.id : ‘’;
+var set = groupId === ‘aq-goals’ ? selGoals : groupId === ‘aq-accts’ ? selAccts : selExp;
+if (set[value]) {
+delete set[value];
+btn.className = ‘aq-chip’;
+} else {
+set[value] = true;
+btn.className = ‘aq-chip sel-multi’;
 }
+};
 
-function selMulti(btn, value) {
-const chips = btn.closest(’.advisor-q-chips’);
-const groupId = chips ? chips.id : ‘’;
-const set = groupId===‘aq-goals’ ? selGoals : groupId===‘aq-accts’ ? selAccts : selExp;
-if(set.has(value)) { set.delete(value); btn.classList.remove(‘sel-multi’); }
-else { set.add(value); btn.classList.add(‘sel-multi’); }
+window.openOther = function(textareaId, btn) {
+var ta = document.getElementById(textareaId);
+if (!ta) return;
+var isOpen = ta.className.indexOf(‘visible’) >= 0;
+btn.className = isOpen ? ‘aq-chip’ : ‘aq-chip other-open’;
+ta.className = isOpen ? ‘other-expand’ : ‘other-expand visible’;
+if (!isOpen) ta.focus();
+};
+
+window.generateAdvisorReport = function() {
+var p = getP();
+var isQC = p.pensionPlan === ‘QPP’;
+
+var emp   = (Number((document.getElementById(‘employment’) || {}).value) || 0) || (Number((document.getElementById(‘b-employment’) || {}).value) || 0);
+var seRev = (Number((document.getElementById(‘seRevenue’) || {}).value) || 0) || (Number((document.getElementById(‘b-se’) || {}).value) || 0);
+var seExpT = calcSEExpensesTotal ? calcSEExpensesTotal() : 0;
+var veh   = Number((document.getElementById(‘vehicle’) || {}).value) || 0;
+var hoff  = Number((document.getElementById(‘homeOffice’) || {}).value) || 0;
+var rrspV = (Number((document.getElementById(‘rrsp’) || {}).value) || 0) || (Number((document.getElementById(‘b-rrsp’) || {}).value) || 0);
+var netSE = Math.max(0, seRev - seExpT - veh - hoff);
+var investInc = (Number((document.getElementById(‘b-invest’) || {}).value) || 0);
+var otherInc  = Number((document.getElementById(‘b-other’) || {}).value) || 0;
+var totalIncome = emp + netSE + investInc + otherInc;
+
+var mFed = 0.145, cum = 16129;
+var fedBrk = [[57375,0.145],[57375,0.205],[63132,0.26],[75532,0.29],[999999,0.33]];
+for (var i = 0; i < fedBrk.length; i++) {
+cum += fedBrk[i][0]; mFed = fedBrk[i][1];
+if (totalIncome < cum) break;
 }
-
-function openOther(textareaId, btn) {
-const ta = document.getElementById(textareaId);
-const isOpen = ta.classList.contains(‘visible’);
-btn.classList.toggle(‘other-open’, !isOpen);
-ta.classList.toggle(‘visible’, !isOpen);
-if(!isOpen) ta.focus();
+var mFedEff = mFed * (1 - p.abatement);
+var mProv = p.provBrackets[0][1], cumP = p.provBPA;
+for (var j = 0; j < p.provBrackets.length; j++) {
+cumP += p.provBrackets[j][0]; mProv = p.provBrackets[j][1];
+if (totalIncome < cumP) break;
 }
+var mRate = mFedEff + mProv;
 
-// ════════════════════════════════════════════════════════
-// ADVISOR REPORT GENERATOR
-// ════════════════════════════════════════════════════════
-function generateAdvisorReport() {
-const p = getP();
-const isQC = p.pensionPlan === ‘QPP’;
+var reportEl = document.getElementById(‘advisorReport’);
+if (reportEl) reportEl.style.display = ‘block’;
 
-const emp    = (+document.getElementById(‘employment’).value||0) || (+document.getElementById(‘b-employment’).value||0);
-const seRev  = (+document.getElementById(‘seRevenue’).value||0) || (+document.getElementById(‘b-se’).value||0);
-const seExpT = calcSEExpensesTotal ? calcSEExpensesTotal() : 0;
-const veh    = +document.getElementById(‘vehicle’).value||0;
-const hoff   = +document.getElementById(‘homeOffice’).value||0;
-const rrspV  = (+document.getElementById(‘rrsp’).value||0) || (+document.getElementById(‘b-rrsp’).value||0);
-const fhsaV  = (+document.getElementById(‘fhsa’).value||0) || (+document.getElementById(‘b-fhsa’).value||0);
-const netSE  = Math.max(0, seRev - seExpT - veh - hoff);
-const investInc = (+document.getElementById(‘b-invest’).value||0) || (+document.getElementById(‘interest’).value||0) + (+document.getElementById(‘eligDiv’).value||0) + (+document.getElementById(‘nonEligDiv’).value||0);
-const otherInc = +document.getElementById(‘b-other’).value||0;
-const totalIncome = emp + netSE + investInc + otherInc;
-
-// Marginal rate
-const fedBrkRaw = [[57375,.145],[57375,.205],[63132,.26],[75532,.29],[Infinity,.33]];
-let mFed=.145, cum=16129;
-for(const [s,r] of fedBrkRaw){cum+=s;if(totalIncome<cum){mFed=r;break;}mFed=r;}
-const mFedEff = mFed*(1-p.abatement);
-let mProv=p.provBrackets[0][1],cumP=p.provBPA;
-for(const [s,r] of p.provBrackets){cumP+=s;if(totalIncome<cumP){mProv=r;break;}mProv=r;}
-const mRate = mFedEff + mProv;
-
-if(totalIncome <= 0) {
-document.getElementById(‘advisorReport’).style.display=‘block’;
-document.getElementById(‘advisorReportSub’).textContent=’’;
-document.getElementById(‘advisorReportBody’).innerHTML=`<div class="advisor-no-data"><strong>No income data found yet.</strong><br>Go to the <strong>Calculator tab</strong>, enter your numbers, then come back for a personalized plan with real dollar amounts.</div>`;
+if (totalIncome <= 0) {
+var subEl = document.getElementById(‘advisorReportSub’);
+var bodyEl = document.getElementById(‘advisorReportBody’);
+if (subEl) subEl.textContent = ‘’;
+if (bodyEl) bodyEl.innerHTML = ‘<div class="advisor-no-data"><strong>No income data found yet.</strong><br>Go to the Calculator tab, enter your numbers, then come back for a personalized plan.</div>’;
 return;
 }
 
-const actions = [];
-const rrspRoom = Math.max(0, Math.min(32490, totalIncome*0.18) - rrspV);
+var actions = [];
+var rrspRoom = Math.max(0, Math.min(32490, totalIncome * 0.18) - rrspV);
 
-if(rrspRoom > 500 && !selAccts.has(‘none’)) {
-actions.push({pri:‘high’,rank:‘🥇’,
-title:`Contribute $${Math.round(rrspRoom).toLocaleString()} more to your RRSP`,
-desc:`You have ~$${Math.round(rrspRoom).toLocaleString()} of unused RRSP room. Every dollar reduces taxable income at your combined marginal rate of ${(mRate*100).toFixed(1)}%.`,
-saving:`Saves ~$${Math.round(rrspRoom*mRate).toLocaleString()} in combined tax`,sc:’’,
-tags:[{t:‘High Impact’,c:‘h’}]});
+if (rrspRoom > 500 && !selAccts[‘none’]) {
+actions.push({pri:‘high’,rank:’🥇’,title:‘Contribute $’ + Math.round(rrspRoom).toLocaleString() + ’ more to your RRSP’,desc:’~$’ + Math.round(rrspRoom).toLocaleString() + ’ unused RRSP room. Every dollar reduces taxable income at your combined marginal rate of ’ + (mRate*100).toFixed(1) + ‘%.’,saving:‘Saves ~$’ + Math.round(rrspRoom*mRate).toLocaleString() + ’ in combined tax’,sc:’’,tags:[{t:‘High Impact’,c:‘h’}]});
 }
-if(selGoals.has(‘home’) && !selAccts.has(‘fhsa’)) {
-actions.push({pri:‘high’,rank:‘🥇’,
-title:`Open & max your FHSA — $8,000 this year`,
-desc:`You flagged buying a home but don't have an FHSA open yet. It's deductible like an RRSP AND tax-free on withdrawal for your first home. Opens at any bank in about 10 minutes.`,
-saving:`Saves ~$${Math.round(8000*mRate).toLocaleString()} in tax this year + tax-free growth`,sc:’’,
-tags:[{t:‘High Impact’,c:‘h’},{t:‘Missing Account’,c:‘x’}]});
+if (selGoals[‘home’] && !selAccts[‘fhsa’]) {
+actions.push({pri:‘high’,rank:’🥇’,title:‘Open & max your FHSA — $8,000 this year’,desc:‘You flagged buying a home but no FHSA open. Deductible like RRSP AND tax-free on withdrawal. Opens at any bank in 10 minutes.’,saving:‘Saves ~$’ + Math.round(8000*mRate).toLocaleString() + ’ in tax + tax-free growth’,sc:’’,tags:[{t:‘High Impact’,c:‘h’},{t:‘Missing Account’,c:‘x’}]});
 }
-if(!selAccts.has(‘tfsa’) && (selAccts.has(‘none’) || selGoals.has(‘invest’) || selGoals.has(‘emergency’))) {
-actions.push({pri:‘med’,rank:‘🥈’,
-title:`Open a TFSA — $7,000 contribution room in 2025`,
-desc:`Any gains inside are 100% tax-free forever, including on withdrawal. Ideal as a first account for emergency fund or investments.`,
-saving:`No immediate deduction — but all growth and withdrawals are permanently tax-free`,sc:‘b’,
-tags:[{t:‘Missing Account’,c:‘x’}]});
+if (!selAccts[‘tfsa’] && (selAccts[‘none’] || selGoals[‘invest’] || selGoals[‘emergency’])) {
+actions.push({pri:‘med’,rank:’🥈’,title:‘Open a TFSA — $7,000 room in 2025’,desc:‘All gains inside are 100% tax-free forever. Ideal first account for emergency fund or investments.’,saving:‘All growth and withdrawals permanently tax-free’,sc:‘b’,tags:[{t:‘Missing Account’,c:‘x’}]});
 }
-if(seRev > 0) {
-actions.push({pri:‘high’,rank:‘🥇’,
-title:`Track every referee expense on your ${p.seFormFed}`,
-desc:`On $${seRev.toLocaleString()} SE revenue: mileage alone at $0.72/km × 60 games × avg 30km = ~$1,296 deduction. Add gear, fees, 50% meals, phone %. Every $1,000 in expenses saves ~$${Math.round(1000*(mRate+p.pensionSERate)).toLocaleString()} combined (tax + ${p.pensionPlan}).`,
-saving:`Each $1,000 in expenses → ~$${Math.round(1000*(mRate+p.pensionSERate)).toLocaleString()} saved`,sc:’’,
-tags:[{t:‘SE Specific’,c:‘h’}]});
+if (seRev > 0) {
+actions.push({pri:‘high’,rank:’🥇’,title:‘Track every referee expense on your ’ + p.seFormFed,desc:‘On $’ + seRev.toLocaleString() + ’ SE revenue: mileage at $0.72/km x 60 games x avg 30km = ~$1,296 deduction alone. Each $1,000 in expenses saves ~$’ + Math.round(1000*(mRate+p.pensionSERate)).toLocaleString() + ’ combined (tax + ’ + p.pensionPlan + ‘).’,saving:‘Each $1,000 expenses → ~$’ + Math.round(1000*(mRate+p.pensionSERate)).toLocaleString() + ’ saved’,sc:’’,tags:[{t:‘SE Specific’,c:‘h’}]});
 }
-if(isQC && selExp.has(‘rent’)) {
-actions.push({pri:‘med’,rank:‘🥈’,
-title:`Claim Québec Solidarity Credit — ask your landlord for RL-31`,
-desc:`As a QC renter you qualify for this refundable credit. Landlords are legally required to provide the RL-31. Housing component (~$103 + 2% of rent) + QST component (~$345). Refundable = you get it even if you owe $0 tax.`,
-saving:`~$500–$800 refundable credit`,sc:‘y’,
-tags:[{t:‘QC Only’,c:‘h’},{t:‘Refundable’,c:‘h’}]});
+if (isQC && selExp[‘rent’]) {
+actions.push({pri:‘med’,rank:’🥈’,title:‘Claim QC Solidarity Credit — ask landlord for RL-31’,desc:‘As a QC renter you qualify. Landlords are legally required to provide RL-31. Refundable = you get it even with $0 tax owing.’,saving:’~$500–$800 refundable credit’,sc:‘y’,tags:[{t:‘QC Only’,c:‘h’},{t:‘Refundable’,c:‘h’}]});
 }
-if(selExp.has(‘tuition’)) {
-const tSaving = Math.round(6000*(0.15+p.provTuitionRate));
-actions.push({pri:‘med’,rank:‘🥈’,
-title:`Claim tuition credits — get your T2202${isQC?' + RL-8':''}`,
-desc:`Your school posts the T2202${isQC?' + RL-8':''} online each February. Federal = 15% of fees. ${p.name} = ${(p.provTuitionRate*100).toFixed(0)}%. Unused credits carry forward indefinitely.`,
-saving:`~$${tSaving.toLocaleString()} per $6,000 of tuition`,sc:‘b’,
-tags:[{t:‘Credit’,c:‘l’}]});
+if (selExp[‘tuition’]) {
+actions.push({pri:‘med’,rank:’🥈’,title:‘Claim tuition credits — get your T2202’ + (isQC?’ + RL-8’:’’),desc:‘Your school posts T2202’ + (isQC?’ + RL-8’:’’) + ’ online each February. Federal = 15% of fees. ’ + p.name + ’ = ’ + (p.provTuitionRate*100).toFixed(0) + ‘%. Unused credits carry forward indefinitely.’,saving:’~$’ + Math.round(6000*(0.15+p.provTuitionRate)).toLocaleString() + ’ per $6,000 of tuition’,sc:‘b’,tags:[{t:‘Credit’,c:‘l’}]});
 }
-if(selExp.has(‘medical’)) {
-actions.push({pri:‘low’,rank:‘🥉’,
-title:`Claim medical expenses — keep all receipts in a folder`,
-desc:`Eligible amount = expenses above 3% of net income. Eligible: prescriptions, dental, vision, physio, medical travel. Pick the best 12-month window that maximizes your total claim.`,
-saving:`Fed 15% + ${p.name} ${(p.provMedicalRate*100).toFixed(0)}% on eligible amount`,sc:‘b’,
-tags:[{t:‘Credit’,c:‘l’}]});
+if (selExp[‘medical’]) {
+actions.push({pri:‘low’,rank:’🥉’,title:‘Claim medical expenses — keep all receipts’,desc:‘Eligible: prescriptions, dental, vision, physio, medical travel. Must exceed 3% of net income. Pick the best 12-month window.’,saving:‘Fed 15% + ’ + p.name + ’ ’ + (p.provMedicalRate*100).toFixed(0) + ‘% on eligible amount’,sc:‘b’,tags:[{t:‘Credit’,c:‘l’}]});
 }
-if(selExp.has(‘charity’)) {
-actions.push({pri:‘med’,rank:‘🥈’,
-title:`Donation bunching strategy — credit jumps sharply after $200`,
-desc:`Federal: 15% on first $200, then 29% on the rest. Consider combining 2 years of giving into 1 tax year. Example: $1,000 → ~$${Math.round(200*.15+800*.29+1000*p.provDonationRate2).toLocaleString()} combined credit.`,
-saving:`~$${Math.round(200*.15+800*.29+1000*p.provDonationRate2).toLocaleString()} on $1,000 donated`,sc:‘b’,
-tags:[{t:‘Strategy’,c:‘m’}]});
-}
-if(selExp.has(‘moving’)) {
-actions.push({pri:‘med’,rank:‘🥈’,
-title:`Moving expenses — deductible if 40km+ closer to work/school`,
-desc:`Eligible: moving truck, hotel, meals in transit, utility connection fees. File T1-M${isQC?' + TP-1':''} with receipts. Deductible against income earned at your new location.`,
-saving:`Deductible at your ~${(mRate*100).toFixed(0)}% marginal rate`,sc:‘y’,
-tags:[{t:‘Deduction’,c:‘m’}]});
-}
-if((selExp.has(‘gear’) || selExp.has(‘vehicle’)) && seRev===0) {
-actions.push({pri:‘low’,rank:‘🥉’,
-title:`Get a T2200 from your employer for employee work expenses`,
-desc:`If your employer requires you to pay work expenses, a signed T2200 (Declaration of Conditions of Employment) unlocks deductions for home office, vehicle, supplies — even as a regular employee.`,
-saving:`Potentially hundreds depending on your expenses`,sc:‘b’,
-tags:[{t:‘Employee’,c:‘l’}]});
-}
-if(selGoals.has(‘retire’) && rrspV < 10000 && totalIncome > 60000 && rrspRoom > 0) {
-actions.push({pri:‘high’,rank:‘🥇’,
-title:`RRSP catch-up now — rate arbitrage compounds over decades`,
-desc:`On $${totalIncome.toLocaleString()} income, maxing RRSP now defers tax at ${(mRate*100).toFixed(0)}%. If you retire at 55, withdrawals happen at a much lower bracket — the spread is pure permanent savings.`,
-saving:`~$${Math.round(rrspRoom*mRate).toLocaleString()} immediate + long-term compounding`,sc:’’,
-tags:[{t:‘Long-term’,c:‘l’},{t:‘High Impact’,c:‘h’}]});
+if (selExp[‘charity’]) {
+actions.push({pri:‘med’,rank:’🥈’,title:‘Donation bunching — credit jumps after $200’,desc:‘Federal: 15% on first $200, then 29% on the rest. Consider combining 2 years of giving into 1 tax year.’,saving:’~$’ + Math.round(200*0.15+800*0.29+1000*p.provDonationRate2).toLocaleString() + ’ credit on $1,000 donated’,sc:‘b’,tags:[{t:‘Strategy’,c:‘m’}]});
 }
 
-const ord = {high:0,med:1,low:2};
-actions.sort((a,b)=>ord[a.pri]-ord[b.pri]);
+var ord = {high:0,med:1,low:2};
+actions.sort(function(a,b) { return ord[a.pri] - ord[b.pri]; });
 
-document.getElementById(‘advisorReport’).style.display=‘block’;
-document.getElementById(‘advisorReportSub’).innerHTML=`Based on ~$${totalIncome.toLocaleString()} income · ${p.name} · Marginal rate ~${(mRate*100).toFixed(1)}% combined`;
+var subEl2 = document.getElementById(‘advisorReportSub’);
+if (subEl2) subEl2.innerHTML = ‘Based on ~$’ + totalIncome.toLocaleString() + ’ income · ’ + p.name + ’ · Marginal rate ~’ + (mRate*100).toFixed(1) + ‘% combined’;
 
-if(!actions.length) {
-document.getElementById(‘advisorReportBody’).innerHTML=`<div class="advisor-no-data"><strong>You look well-optimized!</strong><br>No major missed opportunities found from your current profile. Add more expense details for more targeted advice.</div>`;
+var bodyEl2 = document.getElementById(‘advisorReportBody’);
+if (!bodyEl2) return;
+
+if (!actions.length) {
+bodyEl2.innerHTML = ‘<div class="advisor-no-data"><strong>You look well-optimized!</strong><br>No major missed opportunities found. Add more detail for targeted advice.</div>’;
 return;
 }
 
-let html = `<div class="advisor-section-label">Your top ${actions.length} recommended actions</div>`;
-actions.forEach(a => {
-const tags = a.tags.map(t=>`<span class="atag ${t.c}">${t.t}</span>`).join(’’);
-html += `<div class="advisor-action p-${a.pri}"> <div class="action-rank">${a.rank}</div> <div class="action-body"> <div style="margin-bottom:6px;">${tags}</div> <div class="action-title">${a.title}</div> <div class="action-desc">${a.desc}</div> <div class="action-saving ${a.sc}">💰 ${a.saving}</div> </div> </div>`;
+var html = ‘<div class="advisor-section-label">Your top ’ + actions.length + ’ recommended actions</div>’;
+actions.forEach(function(a) {
+var tags = a.tags.map(function(t) { return ‘<span class="atag ' + t.c + '">’ + t.t + ‘</span>’; }).join(’’);
+html += ‘<div class="advisor-action p-' + a.pri + '"><div class="action-rank">’ + a.rank + ‘</div><div class="action-body"><div style="margin-bottom:6px;">’ + tags + ‘</div><div class="action-title">’ + a.title + ‘</div><div class="action-desc">’ + a.desc + ’</div><div class="action-saving ' + a.sc + '">💰 ’ + a.saving + ‘</div></div></div>’;
 });
-document.getElementById(‘advisorReportBody’).innerHTML = html;
-document.getElementById(‘advisorReport’).scrollIntoView({behavior:‘smooth’,block:‘start’});
-}
+bodyEl2.innerHTML = html;
+reportEl.scrollIntoView({behavior:‘smooth’,block:‘start’});
+};
+
+// Expose all remaining functions called from onclick to window
+// This is the key fix for iOS Safari onclick reliability
+window.toggleTip = toggleTip;
+window.closeTip = closeTip;
+window.sendChat = sendChat;
+window.toggleChat = toggleChat;
+window.calculate = calculate;
+window.updateMarginalRate = updateMarginalRate;
+window.updatePensionDisplay = updatePensionDisplay;
+window.updateSEQPP = updateSEQPP;
+window.updateSEExpenses = updateSEExpenses;
+window.switchProvince = switchProvince;
 
 // ════════════════════════════════════════════════════════
-// INIT
+// INIT — safe, wrapped
 // ════════════════════════════════════════════════════════
-window.addEventListener(‘DOMContentLoaded’, function() {
+window.addEventListener(‘load’, function() {
 try {
-switchProvince();
-updateBasicProvLabel();
+if (window.switchProvince) window.switchProvince();
+if (window.updateBasicProvLabel) window.updateBasicProvLabel();
 } catch(e) {
-console.error(‘Init error:’, e);
+// Silent fail — page still usable
 }
 });
 </script>
